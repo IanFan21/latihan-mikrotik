@@ -1,0 +1,1244 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Latihan MikroTik Winbox — Praktik 2 Pertemuan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: #eef2f6;
+        --bg-deep: #0b2239;
+        --surface: #ffffff;
+        --surface-2: #f4f7fa;
+        --ink: #14232f;
+        --ink-soft: #43566a;
+        --ink-faint: #71808f;
+        --line: #d5dee7;
+        --line-strong: #b9c8d6;
+        --accent: #0077b6;
+        --accent-deep: #005f8f;
+        --accent-soft: #e1f1fa;
+        --ok: #177245;
+        --ok-soft: #e2f4ea;
+        --warn: #9a6206;
+        --warn-soft: #fdf0d5;
+        --bad: #b3261e;
+        --bad-soft: #fbe7e5;
+        --term-bg: #0d1b29;
+        --term-ink: #cfe6f5;
+        --chip-bg: #e8eff5;
+        --shadow: 0 10px 30px rgba(11, 34, 57, .10);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0a141f;
+          --bg-deep: #060d16;
+          --surface: #12202f;
+          --surface-2: #0e1a28;
+          --ink: #e8f0f7;
+          --ink-soft: #b3c4d4;
+          --ink-faint: #7e93a7;
+          --line: #24384c;
+          --line-strong: #35506c;
+          --accent: #38b6ee;
+          --accent-deep: #7ccdf5;
+          --accent-soft: #10334a;
+          --ok: #4cc983;
+          --ok-soft: #123527;
+          --warn: #e5b95c;
+          --warn-soft: #3a2f10;
+          --bad: #f0837c;
+          --bad-soft: #3d1a17;
+          --term-bg: #050b12;
+          --term-ink: #cfe6f5;
+          --chip-bg: #1b3047;
+          --shadow: 0 10px 30px rgba(0, 0, 0, .45);
+        }
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "Public Sans", system-ui, sans-serif;
+        font-size: 16px;
+        line-height: 1.6;
+      }
+      h1, h2, h3, h4 { font-family: "Archivo", "Public Sans", sans-serif; line-height: 1.2; margin: 0; }
+      p { margin: 0; }
+      a { color: var(--accent); }
+      code, .mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
+      .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+
+      /* ---------- top nav ---------- */
+      .topnav {
+        position: sticky; top: 0; z-index: 50;
+        background: var(--bg-deep);
+        border-bottom: 3px solid var(--accent);
+      }
+      .topnav .wrap { display: flex; align-items: center; gap: 18px; padding-top: 10px; padding-bottom: 10px; flex-wrap: wrap; }
+      .topnav .brand { color: #fff; font-family: "Archivo", sans-serif; font-weight: 800; font-size: 15px; letter-spacing: .02em; display: flex; align-items: center; gap: 9px; }
+      .topnav .brand svg { flex: none; }
+      .topnav nav { display: flex; gap: 4px; flex-wrap: wrap; margin-left: auto; }
+      .topnav nav a {
+        color: #cfe2f0; text-decoration: none; font-size: 13.5px; font-weight: 600;
+        padding: 6px 11px; border-radius: 6px;
+      }
+      .topnav nav a:hover { background: rgba(255,255,255,.12); color: #fff; }
+
+      /* ---------- hero ---------- */
+      .hero { background: var(--bg-deep); color: #eaf3fa; padding: 44px 0 40px; }
+      .hero .tagline {
+        display: inline-block; font-family: "JetBrains Mono", monospace; font-size: 12.5px;
+        color: #8fd3f7; border: 1px solid #2b5a7d; border-radius: 999px; padding: 4px 12px; margin-bottom: 16px;
+      }
+      .hero h1 { font-size: clamp(30px, 5.4vw, 46px); font-weight: 800; max-width: 700px; }
+      .hero h1 .hl { color: #38b6ee; }
+      .hero .lead { margin-top: 14px; font-size: 17px; color: #c3d7e8; max-width: 640px; }
+      .hero-facts { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+      .fact {
+        background: rgba(255,255,255,.06); border: 1px solid #28455e; border-radius: 8px;
+        padding: 10px 14px; min-width: 150px;
+      }
+      .fact b { display: block; font-family: "Archivo", sans-serif; font-size: 19px; color: #fff; }
+      .fact span { font-size: 12.5px; color: #9db8cc; }
+
+      /* ---------- sections ---------- */
+      section.block { padding: 46px 0 8px; }
+      .sec-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 8px; flex-wrap: wrap; }
+      .sec-num {
+        font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 13px;
+        background: var(--accent); color: #fff; border-radius: 6px; padding: 4px 9px;
+      }
+      .sec-head h2 { font-size: clamp(23px, 3.6vw, 30px); font-weight: 800; }
+      .sec-sub { color: var(--ink-soft); max-width: 720px; margin-bottom: 22px; }
+
+      .card {
+        background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+        padding: 22px; box-shadow: var(--shadow);
+      }
+      .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+      .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+      @media (max-width: 820px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+
+      /* ---------- panduan ---------- */
+      .flow { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 18px; }
+      @media (max-width: 900px) { .flow { grid-template-columns: repeat(2, 1fr); } }
+      @media (max-width: 520px) { .flow { grid-template-columns: 1fr; } }
+      .flow-step { background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--accent); border-radius: 10px; padding: 14px 16px; }
+      .flow-step .n { font-family: "JetBrains Mono", monospace; font-size: 12px; font-weight: 700; color: var(--accent); }
+      .flow-step h3 { font-size: 15.5px; margin: 4px 0 5px; }
+      .flow-step p { font-size: 13.5px; color: var(--ink-soft); }
+
+      table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+      th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+      th { font-family: "Archivo", sans-serif; font-size: 13px; letter-spacing: .03em; color: var(--ink-soft); background: var(--surface-2); }
+      tr:last-child td { border-bottom: none; }
+      .tbl-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+      .tbl-scroll table { min-width: 560px; }
+
+      .note {
+        border-radius: 10px; padding: 14px 16px; font-size: 14.5px; margin-top: 16px;
+        background: var(--accent-soft); border: 1px solid var(--line-strong);
+      }
+      .note b { font-family: "Archivo", sans-serif; }
+      .note.warn { background: var(--warn-soft); }
+
+      /* ---------- materi ---------- */
+      .tujuan { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+      .tujuan li { display: flex; gap: 10px; font-size: 15px; }
+      .tujuan li::before {
+        content: ""; flex: none; width: 9px; height: 9px; border-radius: 2px;
+        background: var(--accent); margin-top: 8px;
+      }
+      .path {
+        display: inline-flex; align-items: center; gap: 5px; flex-wrap: wrap;
+        font-family: "JetBrains Mono", monospace; font-size: 12.5px; font-weight: 600;
+      }
+      .path .seg { background: var(--chip-bg); border: 1px solid var(--line-strong); border-radius: 5px; padding: 2px 8px; }
+      .path .arr { color: var(--ink-faint); font-weight: 400; }
+
+      .steps { list-style: none; margin: 0; padding: 0; counter-reset: st; display: grid; gap: 0; }
+      .steps > li { display: grid; grid-template-columns: 40px 1fr; gap: 14px; padding: 16px 0; border-bottom: 1px dashed var(--line-strong); }
+      .steps > li:last-child { border-bottom: none; }
+      .steps .no {
+        counter-increment: st; width: 34px; height: 34px; border-radius: 50%;
+        background: var(--bg-deep); color: #fff; font-family: "Archivo", sans-serif; font-weight: 700;
+        display: flex; align-items: center; justify-content: center; font-size: 15px;
+      }
+      .steps .no::before { content: counter(st); }
+      .steps h4 { font-size: 16px; margin-bottom: 4px; }
+      .steps p { font-size: 14.5px; color: var(--ink-soft); }
+      .steps p + .path, .steps p + .term { margin-top: 8px; }
+      .steps ul { margin: 6px 0 0; padding-left: 18px; color: var(--ink-soft); font-size: 14.5px; }
+      .steps ul li { margin: 3px 0; }
+
+      .term {
+        background: var(--term-bg); color: var(--term-ink); border-radius: 8px;
+        font-family: "JetBrains Mono", monospace; font-size: 13px; line-height: 1.75;
+        padding: 12px 16px; overflow-x: auto; white-space: nowrap;
+      }
+      .term .dim { color: #5f8299; }
+      .term .grn { color: #7ee2a8; }
+
+      .target-box { background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+      .target-box h4 { font-size: 14px; letter-spacing: .04em; color: var(--accent-deep); margin-bottom: 8px; }
+      .kv { display: grid; grid-template-columns: 170px 1fr; gap: 4px 14px; font-size: 14.5px; }
+      .kv dt { color: var(--ink-soft); }
+      .kv dd { margin: 0; font-family: "JetBrains Mono", monospace; font-size: 13.5px; font-weight: 600; }
+      @media (max-width: 520px) { .kv { grid-template-columns: 1fr; } .kv dd { margin-bottom: 6px; } }
+
+      .topology { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; overflow-x: auto; }
+      .topology svg { display: block; margin: 0 auto; min-width: 560px; width: 100%; max-width: 760px; height: auto; }
+      .topology figcaption { text-align: center; font-size: 13px; color: var(--ink-faint); margin-top: 8px; }
+
+      /* ---------- checklist praktik (styled list, bukan checkbox) ---------- */
+      .check-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; }
+      .check-list li {
+        display: flex; gap: 12px; align-items: flex-start; background: var(--surface);
+        border: 1px solid var(--line); border-radius: 9px; padding: 11px 14px; font-size: 14.5px;
+      }
+      .check-list .box {
+        flex: none; width: 20px; height: 20px; border: 2px solid var(--line-strong);
+        border-radius: 5px; margin-top: 2px; background: var(--surface-2);
+      }
+      .check-list li span small { display: block; color: var(--ink-faint); font-size: 13px; }
+
+      /* ---------- tugas ---------- */
+      .tugas-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+      .tugas-head .badge {
+        font-family: "JetBrains Mono", monospace; font-size: 12px; font-weight: 700;
+        background: var(--warn-soft); color: var(--warn); border: 1px solid var(--warn);
+        padding: 3px 10px; border-radius: 999px;
+      }
+      .tugas ol { margin: 10px 0 0; padding-left: 20px; display: grid; gap: 8px; font-size: 15px; }
+      .tugas ol li::marker { font-family: "Archivo", sans-serif; font-weight: 700; color: var(--accent); }
+      .copy-btn {
+        appearance: none; border: 1px solid var(--accent); background: var(--accent); color: #fff;
+        font-family: "Archivo", sans-serif; font-weight: 700; font-size: 13.5px;
+        padding: 8px 16px; border-radius: 8px; cursor: pointer;
+      }
+      .copy-btn:hover { background: var(--accent-deep); }
+      .copy-btn.ghost { background: transparent; color: var(--accent); }
+      .copy-btn.ghost:hover { background: var(--accent-soft); }
+      .copy-msg { font-size: 13px; color: var(--ok); font-weight: 600; }
+
+      /* ---------- kuis ---------- */
+      .quiz { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 22px; box-shadow: var(--shadow); }
+      .quiz-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+      .quiz-top h3 { font-size: 19px; }
+      .score-pill {
+        font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 13.5px;
+        background: var(--chip-bg); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 13px;
+      }
+      .q { padding: 16px 0; border-bottom: 1px dashed var(--line-strong); }
+      .q:last-of-type { border-bottom: none; }
+      .q .qtext { font-weight: 600; font-size: 15.5px; margin-bottom: 10px; }
+      .q .qtext .qn { color: var(--accent); font-family: "JetBrains Mono", monospace; font-size: 13px; margin-right: 6px; }
+      .opts { display: grid; gap: 8px; }
+      .opt {
+        appearance: none; text-align: left; width: 100%; cursor: pointer;
+        background: var(--surface-2); color: var(--ink); border: 1px solid var(--line-strong);
+        border-radius: 8px; padding: 10px 14px; font-size: 14.5px; font-family: inherit;
+        display: flex; gap: 10px; align-items: baseline;
+      }
+      .opt .letter { font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 12.5px; color: var(--ink-faint); flex: none; }
+      .opt:hover:not(:disabled) { border-color: var(--accent); }
+      .opt:disabled { cursor: default; opacity: .85; }
+      .opt.correct { background: var(--ok-soft); border-color: var(--ok); }
+      .opt.correct .letter { color: var(--ok); }
+      .opt.wrong { background: var(--bad-soft); border-color: var(--bad); }
+      .opt.wrong .letter { color: var(--bad); }
+      .explain { display: none; margin-top: 10px; font-size: 14px; background: var(--accent-soft); border-radius: 8px; padding: 10px 14px; color: var(--ink); }
+      .explain.show { display: block; }
+      .quiz-foot { display: flex; align-items: center; gap: 14px; margin-top: 16px; flex-wrap: wrap; }
+      .quiz-result { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 15px; }
+
+      /* ---------- glosarium ---------- */
+      .gloss { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+      @media (max-width: 820px) { .gloss { grid-template-columns: repeat(2, 1fr); } }
+      @media (max-width: 520px) { .gloss { grid-template-columns: 1fr; } }
+      .gloss div { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 13px 15px; }
+      .gloss dt { font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 13.5px; color: var(--accent-deep); }
+      .gloss dd { margin: 4px 0 0; font-size: 13.5px; color: var(--ink-soft); }
+
+      footer { margin-top: 56px; background: var(--bg-deep); color: #9db8cc; padding: 26px 0 34px; font-size: 13.5px; }
+      footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+      footer b { color: #eaf3fa; font-family: "Archivo", sans-serif; }
+
+      @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topnav">
+      <div class="wrap">
+        <span class="brand">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2" y="7" width="20" height="10" rx="2" fill="#38b6ee"/><circle cx="6.5" cy="12" r="1.4" fill="#0b2239"/><rect x="10" y="10.8" width="9" height="2.4" rx="1.2" fill="#0b2239" opacity=".55"/><path d="M8 7a6 6 0 0 1 8 0" stroke="#38b6ee" stroke-width="2" stroke-linecap="round"/></svg>
+          LATIHAN MIKROTIK · WINBOX
+        </span>
+        <nav>
+          <a href="#panduan">Panduan</a>
+          <a href="#parameter">Parameter Pribadi</a>
+          <a href="#simulator">Simulator</a>
+          <a href="#pertemuan-1">Pertemuan 1</a>
+          <a href="#pertemuan-2">Pertemuan 2</a>
+          <a href="#glosarium">Glosarium</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="hero">
+      <div class="wrap">
+        <span class="tagline">// mode latihan pengganti praktik langsung · RouterOS via Winbox</span>
+        <h1>Latihan Setting MikroTik di <span class="hl">Winbox</span>, Tanpa Harus Pegang Router</h1>
+        <p class="lead">Besok jadwal praktik kita bentrok dengan ujian TKA, jadi praktik diganti mode latihan: kamu tetap belajar mengkonfigurasi MikroTik lewat simulator Winbox di halaman ini, lengkap dengan misi, kuis jebakan, dan tugas berskenario untuk <b>2 kali pertemuan</b>.</p>
+        <div class="hero-facts">
+          <div class="fact"><b>2 Pertemuan</b><span>Pertemuan 1: konfigurasi dasar<br>Pertemuan 2: layanan &amp; keamanan</span></div>
+          <div class="fact"><b>8 Misi Simulator</b><span>Latihan klik menu Winbox<br>seperti router sungguhan</span></div>
+          <div class="fact"><b>Parameter Pribadi</b><span>IP, SSID &amp; limit dihitung<br>dari nomor absenmu sendiri</span></div>
+          <div class="fact"><b>2 Tugas Besar</b><span>Skenario kasus nyata +<br>detektif konfigurasi rusak</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= PANDUAN ================= -->
+    <section class="block" id="panduan">
+      <div class="wrap">
+        <div class="sec-head"><span class="sec-num">01</span><h2>Panduan Penggunaan</h2></div>
+        <p class="sec-sub">Ikuti alur ini di setiap pertemuan. Urutannya sengaja dibuat seperti praktik beneran: baca konsepnya, coba di simulator, uji pemahaman lewat kuis, lalu kerjakan tugasnya.</p>
+
+        <div class="flow">
+          <div class="flow-step"><span class="n">LANGKAH 1</span><h3>Buat Parameter Pribadi</h3><p>Masukkan nomor absen &amp; nama panggilanmu di bagian Parameter Pribadi. Semua tugas memakai angka hasil hitungan itu — beda siswa, beda jawaban.</p></div>
+          <div class="flow-step"><span class="n">LANGKAH 2</span><h3>Pelajari Materi</h3><p>Baca materi pertemuan dan perhatikan <b>jalur menu</b> Winbox di setiap langkah. Jalur menu adalah “alamat” fitur di Winbox.</p></div>
+          <div class="flow-step"><span class="n">LANGKAH 3</span><h3>Selesaikan Misi Simulator</h3><p>Klik-klik menu di simulator Winbox sesuai misi. Anggap ini pemanasan sebelum menyentuh router asli di pertemuan praktik berikutnya.</p></div>
+          <div class="flow-step"><span class="n">LANGKAH 4</span><h3>Taklukkan Kuis Jebakan</h3><p>Soal kuis berbentuk kasus, bukan hafalan. Baca soalnya pelan-pelan — hampir semua opsi terlihat benar, tapi hanya satu yang paling tepat.</p></div>
+          <div class="flow-step"><span class="n">LANGKAH 5</span><h3>Kerjakan Tugas Skenario</h3><p>Tugas di akhir tiap pertemuan memakai parameter pribadimu. Tulis jawaban dengan bahasamu sendiri di buku/laporan.</p></div>
+        </div>
+
+        <div class="tbl-scroll">
+          <table>
+            <thead><tr><th style="width:22%">Pertemuan</th><th style="width:38%">Fokus Materi</th><th>Target Akhir Pertemuan</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><b>Pertemuan 1</b><br><span class="mono" style="font-size:12.5px">Konfigurasi Dasar</span></td>
+                <td>Login Winbox, reset, identity, IP Address, DHCP Client &amp; Server, DNS, NAT — sampai klien bisa internetan.</td>
+                <td>Router menyala dengan nama barumu, membagikan IP otomatis ke klien, dan klien bisa ping ke internet.</td>
+              </tr>
+              <tr>
+                <td><b>Pertemuan 2</b><br><span class="mono" style="font-size:12.5px">Layanan &amp; Keamanan</span></td>
+                <td>Bridge, Wireless AP, Hotspot + voucher user, Firewall Filter, Simple Queue, manajemen user &amp; backup.</td>
+                <td>Jaringan lab lengkap: ada WiFi, login hotspot, bandwidth dibatasi adil, dan konfigurasi ter-backup.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="note warn">
+          <b>Aturan main tugas:</b> setiap siswa wajib memakai <b>parameter pribadinya sendiri</b> (dari nomor absen). Jawaban yang angkanya tidak cocok dengan parameter pribadi dianggap belum mengerjakan — jadi menyalin jawaban teman atau jawaban umum dari internet/AI akan langsung ketahuan dari angkanya. Yang dinilai adalah <i>caramu berpikir dan langkahmu</i>, bukan sekadar hasil akhir.
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= PARAMETER PRIBADI ================= -->
+    <section class="block" id="parameter">
+      <div class="wrap">
+        <div class="sec-head"><span class="sec-num">02</span><h2>Parameter Pribadi Kamu</h2></div>
+        <p class="sec-sub">Isi nomor absen dan nama panggilanmu. Kartu parameter ini dipakai di <b>semua</b> langkah praktik dan tugas pada kedua pertemuan. Catat atau foto kartu ini — jangan sampai tertukar dengan milik teman.</p>
+
+        <div class="card">
+          <form id="paramForm" style="display:flex;gap:12px;flex-wrap:wrap;align-items:end">
+            <label style="flex:1;min-width:180px">
+              <span style="display:block;font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;letter-spacing:.03em;margin-bottom:6px">NAMA PANGGILAN</span>
+              <input id="inNama" type="text" placeholder="cth: Bima" autocomplete="off" style="width:100%;padding:11px 13px;border:1px solid var(--line-strong);border-radius:8px;font:inherit;background:var(--surface);color:var(--ink)" />
+            </label>
+            <label style="flex:1;min-width:140px">
+              <span style="display:block;font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;letter-spacing:.03em;margin-bottom:6px">NOMOR ABSEN (1–40)</span>
+              <input id="inAbsen" type="number" min="1" max="40" placeholder="cth: 17" style="width:100%;padding:11px 13px;border:1px solid var(--line-strong);border-radius:8px;font:inherit;background:var(--surface);color:var(--ink)" />
+            </label>
+            <button type="submit" class="copy-btn" style="padding:12px 20px">Buat Kartu Parameter</button>
+          </form>
+          <div id="paramOut" style="margin-top:18px">
+            <p style="color:var(--ink-faint);font-size:14.5px">Kartu parameter belum dibuat. Setelah dibuat, nilainya muncul di sini dan otomatis terisi juga di contoh-contoh tugas di bawah.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SIMULATOR ================= -->
+    <style>
+      .sim-layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 18px; align-items: start; }
+      @media (max-width: 900px) { .sim-layout { grid-template-columns: 1fr; } }
+      .winbox {
+        background: #e9edf1; border: 1px solid #7d8fa3; border-radius: 10px; overflow: hidden;
+        box-shadow: 0 18px 40px rgba(11,34,57,.28); color: #16222e;
+        font-size: 13.5px;
+      }
+      .wb-titlebar {
+        background: linear-gradient(180deg, #155a8a, #0d4066); color: #fff;
+        display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+        font-family: "JetBrains Mono", monospace; font-size: 12.5px; font-weight: 600;
+      }
+      .wb-titlebar .wb-btns { margin-left: auto; display: flex; gap: 6px; }
+      .wb-titlebar .wb-btns span {
+        width: 22px; height: 18px; border-radius: 3px; background: rgba(255,255,255,.16);
+        display: inline-flex; align-items: center; justify-content: center; font-size: 11px;
+      }
+      .wb-menubar { background: #d7dee6; border-bottom: 1px solid #aebbc9; padding: 5px 12px; font-size: 12.5px; color: #43566a; display: flex; gap: 16px; flex-wrap: wrap; }
+      .wb-body { display: flex; min-height: 430px; }
+      .wb-menu { width: 178px; flex: none; background: #dde4ec; border-right: 1px solid #aebbc9; padding: 8px 6px; display: flex; flex-direction: column; gap: 1px; }
+      .wb-menu button {
+        appearance: none; border: none; background: transparent; text-align: left; cursor: pointer;
+        font: inherit; font-size: 13px; font-weight: 600; color: #24384c;
+        padding: 6px 9px; border-radius: 5px; display: flex; align-items: center; gap: 7px; width: 100%;
+      }
+      .wb-menu button:hover { background: #c9d6e4; }
+      .wb-menu button.active { background: #0d5c8c; color: #fff; }
+      .wb-menu button .dot { width: 7px; height: 7px; border-radius: 2px; background: #5b7d99; flex: none; }
+      .wb-menu button.active .dot { background: #8fd3f7; }
+      .wb-menu .group-label { font-size: 11px; font-weight: 700; letter-spacing: .06em; color: #68798c; padding: 8px 9px 2px; }
+      .wb-menu button.child { padding-left: 24px; font-weight: 500; font-size: 12.8px; }
+      .wb-main { flex: 1; display: flex; flex-direction: column; min-width: 0; background: #f4f6f9; }
+      .wb-toolbar { display: flex; gap: 6px; flex-wrap: wrap; padding: 8px 10px; border-bottom: 1px solid #c3cedb; background: #e6ebf1; min-height: 41px; align-items: center; }
+      .wb-tbtn {
+        appearance: none; border: 1px solid #9fb0c1; background: linear-gradient(180deg,#fdfdfd,#dde4ec);
+        border-radius: 5px; font: inherit; font-size: 12.5px; font-weight: 600; color: #24384c;
+        padding: 4px 11px; cursor: pointer;
+      }
+      .wb-tbtn:hover { border-color: #0d5c8c; }
+      .wb-tbtn.primary { background: linear-gradient(180deg,#1b7ab8,#0d5c8c); color: #fff; border-color: #0a4a70; }
+      .wb-tbtn:disabled { opacity: .45; cursor: default; }
+      .wb-content { flex: 1; padding: 12px; overflow-x: auto; }
+      .wb-content table { font-size: 12.8px; min-width: 430px; }
+      .wb-content th { background: #dde4ec; color: #33475c; font-size: 11.5px; }
+      .wb-content td, .wb-content th { border-bottom: 1px solid #d3dce5; padding: 6px 9px; }
+      .wb-content .flag { font-family: "JetBrains Mono", monospace; font-weight: 700; color: #0d5c8c; }
+      .wb-content .dyn { color: #8a5a00; font-weight: 700; font-family: "JetBrains Mono", monospace; }
+      .wb-pane-title { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 14px; margin-bottom: 8px; color: #24384c; }
+      .wb-form { display: grid; gap: 9px; max-width: 420px; }
+      .wb-form label { display: grid; grid-template-columns: 130px 1fr; gap: 10px; align-items: center; font-size: 13px; font-weight: 600; color: #33475c; }
+      .wb-form input, .wb-form select {
+        font: inherit; font-size: 13px; padding: 5px 8px; border: 1px solid #9fb0c1; border-radius: 4px; background: #fff; color: #16222e; width: 100%;
+      }
+      .wb-check { display: inline-flex; gap: 7px; align-items: center; font-size: 13px; font-weight: 600; color: #33475c; }
+      .wb-check .cb { width: 15px; height: 15px; border: 1.5px solid #7d8fa3; border-radius: 3px; background: #fff; display: inline-flex; align-items: center; justify-content: center; color: #0d5c8c; font-size: 12px; font-weight: 900; }
+      .wb-term { background: #0d1b29; color: #cfe6f5; border-radius: 6px; padding: 12px 14px; font-family: "JetBrains Mono", monospace; font-size: 12.3px; line-height: 1.8; overflow-x: auto; white-space: nowrap; }
+      .wb-term .dim { color: #5f8299; } .wb-term .grn { color: #7ee2a8; } .wb-term .red { color: #ff9d94; }
+      .wb-statusbar { border-top: 1px solid #aebbc9; background: #dde4ec; padding: 6px 12px; font-size: 12.5px; color: #33475c; display: flex; gap: 14px; flex-wrap: wrap; }
+      .wb-statusbar .ok { color: #177245; font-weight: 700; }
+      @media (max-width: 640px) {
+        .wb-body { flex-direction: column; }
+        .wb-menu { width: 100%; flex-direction: row; flex-wrap: wrap; border-right: none; border-bottom: 1px solid #aebbc9; }
+        .wb-menu .group-label { width: 100%; padding-top: 4px; }
+        .wb-menu button { width: auto; }
+        .wb-menu button.child { padding-left: 9px; }
+      }
+      .missions { position: sticky; top: 76px; }
+      @media (max-width: 900px) { .missions { position: static; } }
+      .missions h3 { font-size: 17px; margin-bottom: 4px; }
+      .missions .prog { height: 9px; border-radius: 99px; background: var(--chip-bg); overflow: hidden; margin: 10px 0 14px; }
+      .missions .prog i { display: block; height: 100%; width: 0%; background: var(--accent); transition: width .4s ease; }
+      .mission-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; }
+      .mission-list li { display: flex; gap: 10px; font-size: 13.8px; border: 1px solid var(--line); border-radius: 9px; padding: 9px 11px; background: var(--surface-2); }
+      .mission-list li .st { flex: none; width: 21px; height: 21px; border-radius: 50%; border: 2px solid var(--line-strong); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 900; color: transparent; margin-top: 1px; }
+      .mission-list li.done { border-color: var(--ok); background: var(--ok-soft); }
+      .mission-list li.done .st { background: var(--ok); border-color: var(--ok); color: #fff; }
+      .mission-list li b { display: block; font-family: "Archivo", sans-serif; font-size: 13.5px; }
+      .mission-list li span { color: var(--ink-soft); font-size: 12.8px; }
+      .mission-list li.done span { color: var(--ink-soft); }
+      .mission-msg { margin-top: 12px; font-size: 13.5px; min-height: 22px; font-weight: 600; color: var(--accent-deep); }
+    </style>
+    <section class="block" id="simulator">
+      <div class="wrap">
+        <div class="sec-head"><span class="sec-num">03</span><h2>Simulator Winbox</h2></div>
+        <p class="sec-sub">Ini tiruan jendela Winbox yang terhubung ke router <span class="mono">192.168.88.1</span>. Klik menu di sebelah kiri seperti di Winbox asli, lalu selesaikan 8 misi di panel kanan. Misi 5 hanya selesai kalau kamu benar-benar menekan tombol <b>Apply</b> — bukan sekadar membuka menunya.</p>
+
+        <div class="sim-layout">
+          <div class="winbox" role="application" aria-label="Simulator Winbox">
+            <div class="wb-titlebar">
+              <span style="font-size:14px">▦</span>
+              <span id="wbTitle">admin@192.168.88.1 (MikroTik) — WinBox</span>
+              <span class="wb-btns"><span>–</span><span>▢</span><span>✕</span></span>
+            </div>
+            <div class="wb-menubar"><span>Session</span><span>Settings</span><span>Advanced</span><span style="margin-left:auto" class="mono">RoS v6 · safe mode: off</span></div>
+            <div class="wb-body">
+              <nav class="wb-menu" id="wbMenu" aria-label="Menu Winbox"></nav>
+              <div class="wb-main">
+                <div class="wb-toolbar" id="wbToolbar"></div>
+                <div class="wb-content" id="wbContent"></div>
+                <div class="wb-statusbar"><span id="wbStatus">Terhubung ke 192.168.88.1 via port 8291</span><span style="margin-left:auto" class="mono">uptime 00:07:41</span></div>
+              </div>
+            </div>
+          </div>
+
+          <aside class="card missions">
+            <h3>Misi Simulator</h3>
+            <p style="font-size:13.5px;color:var(--ink-soft)">Progress: <b id="missionCount">0 / 8</b> misi selesai</p>
+            <div class="prog"><i id="missionBar"></i></div>
+            <ol class="mission-list" id="missionList"></ol>
+            <p class="mission-msg" id="missionMsg" aria-live="polite"></p>
+            <button class="copy-btn ghost" id="missionReset" type="button">Ulangi Misi dari Awal</button>
+          </aside>
+        </div>
+
+        <div class="note">
+          <b>Bedanya dengan router asli?</b> Di simulator ini klik yang salah tidak merusak apa pun — justru itu gunanya: coba-coba dulu di sini. Di router asli nanti, biasakan membaca nama menu dan nilai yang kamu ubah <i>sebelum</i> menekan OK/Apply, dan gunakan tombol <b>Safe Mode</b> (Ctrl+X) saat praktik sungguhan.
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= PERTEMUAN 1 ================= -->
+    <section class="block" id="pertemuan-1">
+      <div class="wrap">
+        <div class="sec-head"><span class="sec-num">04</span><h2>Pertemuan 1 — Konfigurasi Dasar Sampai Internet Jalan</h2></div>
+        <p class="sec-sub">Target pertemuan ini sederhana tapi fundamental: router diberi nama, punya IP untuk sisi LAN, membagikan IP otomatis ke klien (DHCP Server), menerjemahkan alamat klien ke internet (NAT), dan klien bisa membuka internet.</p>
+
+        <div class="grid2" style="margin-bottom:18px">
+          <div class="card">
+            <h3 style="font-size:17px;margin-bottom:12px">Tujuan Pembelajaran</h3>
+            <ul class="tujuan">
+              <li>Menjelaskan fungsi Winbox dan perbedaan login via <b>IP Address</b> vs <b>MAC Address</b>.</li>
+              <li>Melakukan reset konfigurasi dan memahami akibat mencentang <i>No Default Configuration</i>.</li>
+              <li>Mengatur Identity, IP Address LAN, DHCP Client (WAN), DHCP Server, DNS, dan NAT Masquerade.</li>
+              <li>Menguji koneksi dengan ping dari router dan dari klien secara berurutan.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3 style="font-size:17px;margin-bottom:12px">Konsep yang Wajib Paham</h3>
+            <ul class="tujuan">
+              <li><b>Login MAC Address</b> bekerja di layer 2 — dipakai saat router belum punya IP atau IP-nya tidak kamu ketahui. Syaratnya: satu jaringan fisik yang sama.</li>
+              <li><b>Default IP RouterOS</b> adalah <span class="mono">192.168.88.1/24</span>, user <span class="mono">admin</span>, password kosong (router baru keluaran terbaru memakai password di stiker bodi).</li>
+              <li><b>DHCP Client</b> = router <i>meminta</i> IP ke jaringan atas (ISP/modem). <b>DHCP Server</b> = router <i>memberi</i> IP ke klien di bawahnya. Arahnya berlawanan — jangan tertukar.</li>
+              <li><b>NAT Masquerade</b> menyamarkan semua IP privat klien menjadi satu IP milik router, supaya klien bisa “nebeng” internet.</li>
+            </ul>
+          </div>
+        </div>
+
+        <figure class="topology" style="margin:0 0 18px">
+          <svg viewBox="0 0 760 190" role="img" aria-label="Topologi jaringan pertemuan 1: internet terhubung ke ether1 router, ether2 dan bridge menuju PC klien dan laptop">
+            <defs>
+              <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0077b6"/></marker>
+            </defs>
+            <g font-family="Public Sans, sans-serif" font-size="13">
+              <ellipse cx="80" cy="80" rx="58" ry="30" fill="#e1f1fa" stroke="#0077b6" stroke-width="1.6"/>
+              <text x="80" y="76" text-anchor="middle" font-weight="700" fill="#0b2239">INTERNET</text>
+              <text x="80" y="94" text-anchor="middle" fill="#43566a" font-size="11.5">/ jaringan ISP</text>
+              <line x1="138" y1="80" x2="268" y2="80" stroke="#0077b6" stroke-width="2" marker-end="url(#arr)"/>
+              <text x="203" y="66" text-anchor="middle" fill="#43566a" font-size="11.5">DHCP Client</text>
+              <text x="203" y="102" text-anchor="middle" fill="#43566a" font-size="11.5" font-family="JetBrains Mono, monospace">ether1 (WAN)</text>
+              <rect x="272" y="42" width="180" height="78" rx="9" fill="#0b2239"/>
+              <text x="362" y="72" text-anchor="middle" font-weight="700" fill="#ffffff" font-size="14.5">MIKROTIK</text>
+              <text x="362" y="92" text-anchor="middle" fill="#8fd3f7" font-size="11.5" font-family="JetBrains Mono, monospace" id="topoIdentity">RouterOS · Winbox</text>
+              <line x1="452" y1="66" x2="566" y2="52" stroke="#0077b6" stroke-width="2"/>
+              <line x1="452" y1="96" x2="566" y2="124" stroke="#0077b6" stroke-width="2"/>
+              <text x="508" y="48" text-anchor="middle" fill="#43566a" font-size="11.5" font-family="JetBrains Mono, monospace">ether2</text>
+              <text x="516" y="128" text-anchor="middle" fill="#43566a" font-size="11.5" font-family="JetBrains Mono, monospace">ether3</text>
+              <rect x="570" y="26" width="130" height="52" rx="7" fill="#ffffff" stroke="#b9c8d6" stroke-width="1.5"/>
+              <text x="635" y="48" text-anchor="middle" font-weight="700" fill="#14232f">PC Klien</text>
+              <text x="635" y="66" text-anchor="middle" fill="#43566a" font-size="11.5">dapat IP via DHCP</text>
+              <rect x="570" y="102" width="130" height="52" rx="7" fill="#ffffff" stroke="#b9c8d6" stroke-width="1.5"/>
+              <text x="635" y="124" text-anchor="middle" font-weight="700" fill="#14232f">Laptop Klien</text>
+              <text x="635" y="142" text-anchor="middle" fill="#43566a" font-size="11.5">dapat IP via DHCP</text>
+              <text x="362" y="160" text-anchor="middle" fill="#43566a" font-size="12">NAT Masquerade di router membuat semua klien tampil sebagai satu IP ke internet</text>
+            </g>
+          </svg>
+          <figcaption>Topologi Pertemuan 1 — satu kabel WAN masuk (ether1), dua klien di sisi LAN (ether2–ether3).</figcaption>
+        </figure>
+
+        <div class="card" style="margin-bottom:18px">
+          <h3 style="font-size:18px;margin-bottom:4px">Langkah Praktik — Ikuti di Simulator &amp; Catat Jalur Menunya</h3>
+          <p style="font-size:14px;color:var(--ink-soft)">Nilai di langkah ini memakai konfigurasi contoh kelas. Di tugas nanti, kamu menggantinya dengan parameter pribadimu.</p>
+          <ol class="steps">
+            <li><span class="no"></span><div>
+              <h4>Login ke Winbox</h4>
+              <p>Buka Winbox → tab <b>Neighbors</b> → klik alamat MAC router yang muncul → user <span class="mono">admin</span>, password dikosongkan → <b>Connect</b>. Login MAC dipakai karena paling anti-gagal: tetap bisa masuk walau IP router berubah atau kosong.</p>
+              <p class="path"><span class="seg">Winbox</span><span class="arr">→</span><span class="seg">Neighbors</span><span class="arr">→</span><span class="seg">MAC Address</span><span class="arr">→</span><span class="seg">Connect</span></p>
+            </div></li>
+            <li><span class="no"></span><div>
+              <h4>Reset konfigurasi (awal yang bersih)</h4>
+              <p>Reset membuat router kembali nol. Centang <b>No Default Configuration</b> supaya kita membangun konfigurasi sendiri dari kosong — di sinilah letak belajarnya. Setelah reset, router <b>tidak punya IP sama sekali</b>, jadi satu-satunya jalan masuk adalah login MAC Address.</p>
+              <p class="path"><span class="seg">System</span><span class="arr">→</span><span class="seg">Reset Configuration</span><span class="arr">→</span><span class="seg">No Default Configuration ✓</span><span class="arr">→</span><span class="seg">Reset Configuration</span></p>
+            </div></li>
+            <li><span class="no"></span><div>
+              <h4>Beri nama router (Identity)</h4>
+              <p>Identity adalah nama router yang tampil di title bar Winbox dan di daftar Neighbors. Di kelas yang routernya banyak, nama yang jelas menyelamatkanmu dari salah setting router orang lain.</p>
+              <p class="path"><span class="seg">System</span><span class="arr">→</span><span class="seg">Identity</span><span class="arr">→</span><span class="seg">isi nama</span><span class="arr">→</span><span class="seg">Apply</span></p>
+            </div></li>
+            <li><span class="no"></span><div>
+              <h4>Pasang IP untuk sisi LAN</h4>
+              <p>Klik tombol <b>+</b>, isi Address <span class="mono">192.168.88.1/24</span>, Interface <span class="mono">ether2</span>. Kolom Network akan terisi otomatis <span class="mono">192.168.88.0</span>. IP inilah yang nanti menjadi <i>gateway</i> bagi semua klien.</p>
+              <p class="path"><span class="seg">IP</span><span class="arr">→</span><span class="seg">Addresses</span><span class="arr">→</span><span class="seg">+</span><span class="arr">→</span><span class="seg">Address: 192.168.88.1/24</span><span class="arr">→</span><span class="seg">Interface: ether2</span></p>
+            </div></li>
+            <li><span class="no"></span><div>
+              <h4>Minta IP ke jaringan atas (DHCP Client)</h4>
+              <p>Klik <b>+</b>, Interface <span class="mono">ether1</span>. Status harus berubah menjadi <b>bound</b> — artinya router berhasil menyewa IP dari modem/ISP. Tanpa langkah ini router tidak punya “kaki” ke internet.</p>
+              <p class="path"><span class="seg">IP</span><span class="arr">→</span><span class="seg">DHCP Client</span><span class="arr">→</span><span class="seg">+</span><span class="arr">→</span><span class="seg">Interface: ether1</span></p>
+            </div></li>
+            <li><span class="no"></span><div>
+              <h4>Bagikan IP ke klien (DHCP Server via Wizard)</h4>
+              <p>Klik <b>DHCP Setup</b> lalu ikuti wizard: Interface <span class="mono">ether2</span> → Address Space <span class="mono">192.168.88.0/24</span> → Gateway <span class="mono">192.168.88.1</span> → Pool <span class="mono">192.168.88.10–192.168.88.254</span> → DNS <span class="mono">8.8.8.8</span> → Lease Time isi <span class="mono">72:00:00</span> (klien menyewa IP selama 3 hari, jadi alamat klien tidak sering berubah).</p>
+              <p class="path"><span class="seg">IP</span><span class="arr">→</span><span class="seg">DHCP Server</span><span class="arr">→</span><span class="seg">DHCP Setup</span><span class="arr">→</span><span class="seg">Next… sampai selesai</span></p>
+            </div></li>
+            <li><span class="no"></span><div>
+              <h4>Aktifkan DNS untuk klien</h4>
+              <p>Isi Servers <span class="mono">8.8.8.8</span> dan <span class="mono">1.1.1.1</span>, lalu centang <b>Allow Remote Requests</b> supaya router mau meneruskan pertanyaan DNS dari klien. Tanpa ini, ping ke IP bisa jalan tapi membuka nama situs gagal — gejala klasik “internet nyambung tapi nggak bisa browsing”.</p>
+              <p class="path"><span class="seg">IP</span><span class="arr">→</span><span class="seg">DNS</span><span class="arr">→</span><span class="seg">Servers</span><span class="arr">→</span><span class="seg">Allow Remote Requests ✓</span></p>
+            </div></li>
+            <li><span class="no"></span><div>
+              <h4>NAT Masquerade — kunci terakhir</h4>
+              <p>Di tab <b>NAT</b>, klik <b>+</b>: Chain <span class="mono">srcnat</span>, Out. Interface <span class="mono">ether1</span>, lalu tab Action → <span class="mono">masquerade</span>. Ini langkah yang paling sering terlupa dan paling sering jadi penyebab “sudah setting semua tapi internet tidak jalan”.</p>
+              <p class="path"><span class="seg">IP</span><span class="arr">→</span><span class="seg">Firewall</span><span class="arr">→</span><span class="seg">tab NAT</span><span class="arr">→</span><span class="seg">+</span><span class="arr">→</span><span class="seg">chain=srcnat, out=ether1, action=masquerade</span></p>
+            </div></li>
+            <li><span class="no"></span><div>
+              <h4>Uji berurutan, jangan asal tebak</h4>
+              <p>Buka terminal di router, lalu uji dari titik paling dekat ke paling jauh. Urutan ini adalah cara teknisi menemukan letak putusnya koneksi:</p>
+              <div class="term"><span class="dim">[admin@MikroTik] &gt;</span> ping 192.168.88.1 <span class="dim">count=3</span> <span class="grn">→ diri sendiri, harus reply</span><br><span class="dim">[admin@MikroTik] &gt;</span> ping 8.8.8.8 <span class="dim">count=3</span> <span class="grn">→ internet via IP</span><br><span class="dim">[admin@MikroTik] &gt;</span> ping google.com <span class="dim">count=3</span> <span class="grn">→ DNS ikut teruji</span></div>
+              <p style="margin-top:8px">Terakhir uji dari PC klien: klien harus mendapat IP di rentang pool, gateway <span class="mono">192.168.88.1</span>, dan bisa ping ke nama domain.</p>
+            </div></li>
+          </ol>
+        </div>
+
+        <div class="grid2" style="margin-bottom:18px">
+          <div class="target-box">
+            <h4>TARGET KONFIGURASI CONTOH (KELAS)</h4>
+            <dl class="kv">
+              <dt>Identity</dt><dd>MikroTik-Lab</dd>
+              <dt>WAN (ether1)</dt><dd>DHCP Client — status bound</dd>
+              <dt>IP LAN (ether2)</dt><dd>192.168.88.1/24</dd>
+              <dt>DHCP Pool</dt><dd>192.168.88.10 – 192.168.88.254</dd>
+              <dt>DNS Server</dt><dd>8.8.8.8 · 1.1.1.1</dd>
+              <dt>NAT</dt><dd>srcnat · ether1 · masquerade</dd>
+            </dl>
+          </div>
+          <div>
+            <h3 style="font-size:16px;margin-bottom:10px">Checklist Praktik Pertemuan 1</h3>
+            <p style="font-size:13.5px;color:var(--ink-soft);margin-bottom:10px">Coret manual di bukumu saat tiap baris berhasil kamu lakukan di simulator / pahami langkahnya:</p>
+            <ul class="check-list">
+              <li><span class="box"></span><span>Login Winbox via MAC Address berhasil<small>Neighbors → klik MAC → Connect</small></span></li>
+              <li><span class="box"></span><span>Identity router berhasil diganti dan terbaca di title bar<small>System → Identity → Apply</small></span></li>
+              <li><span class="box"></span><span>Bisa menyebutkan IP LAN, network, dan gateway tanpa melihat catatan</span></li>
+              <li><span class="box"></span><span>Bisa menjelaskan beda DHCP Client dan DHCP Server dengan satu kalimat</span></li>
+              <li><span class="box"></span><span>Bisa menemukan aturan NAT dan menyebut chain + action-nya</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="quiz" id="quiz1" style="margin-bottom:18px"></div>
+
+        <div class="card tugas" style="margin-bottom:8px">
+          <div class="tugas-head">
+            <h3 style="font-size:19px">Tugas Pertemuan 1 — “Operasi Internet Pertama”</h3>
+            <span class="badge">TOTAL 100 POIN</span>
+          </div>
+          <p style="font-size:14.5px;color:var(--ink-soft)">Kerjakan di buku laporan dengan bahasamu sendiri. Semua angka memakai <b>parameter pribadimu</b> — buat dulu kartunya di <a href="#parameter">bagian Parameter Pribadi</a> bila belum. Tombol salin di bawah menyalin teks tugas beserta parametermu.</p>
+          <ol id="tugas1List">
+            <li><b>Peta Jaringan Versimu (25 poin).</b> Gambar topologi jaringanmu (Internet → router → 2 klien) lalu lengkapi tabel: Identity routermu, IP LAN, alamat network, gateway klien, rentang DHCP pool, dan DNS. Semua nilai diambil dari kartu parametermu — bukan dari contoh kelas.</li>
+            <li><b>Rute Menu dari Nol (25 poin).</b> Tuliskan urutan langkah lengkap (jalur menu + nilai yang diisi) untuk membangun konfigurasi dari router hasil reset <i>No Default Configuration</i> sampai klien bisa internetan, memakai nilaimu sendiri. Urutan yang salah tempat (misalnya NAT dibuat sebelum IP LAN) akan mengurangi nilai — susun seperti teknisi yang benar-benar bekerja.</li>
+            <li><b>Detektif Konfigurasi Rusak (30 poin).</b> Seorang teman mengirim potongan konfigurasi ini dan mengeluh internet tidak jalan. Ada <b>tepat 3 kesalahan</b>. Temukan ketiganya, jelaskan akibatnya, dan tuliskan perbaikan yang benar:
+              <div class="term" style="margin-top:10px">/ip address add address=192.168.50.1/24 interface=ether1<br>/ip dhcp-client add interface=ether2<br>/ip firewall nat add chain=srcnat out-interface=ether2 action=masquerade</div>
+              <span style="font-size:13.5px;color:var(--ink-faint)">Petunjuk arah berpikir: perhatikan <i>di interface mana</i> setiap perintah dipasang, hubungkan dengan topologi ether1 = WAN dan ether2 = LAN.</span>
+            </li>
+            <li><b>Kasus Ruang Sebelah (20 poin).</b> PC klien mendapat IP <span class="mono" data-tpl="poolFirst">192.168.88.10</span> dari routermu dan berhasil ping ke gateway, tetapi gagal ping ke <span class="mono">8.8.8.8</span> — padahal dari terminal router, ping ke <span class="mono">8.8.8.8</span> berhasil. Tuliskan: (a) dua kemungkinan penyebab paling masuk akal, (b) menu yang kamu buka untuk memeriksa masing-masing, (c) urutan pemeriksaanmu dan alasannya. Jawaban “karena NAT” saja tanpa menu dan urutan tidak mendapat poin penuh.</li>
+          </ol>
+          <div style="display:flex;gap:12px;align-items:center;margin-top:16px;flex-wrap:wrap">
+            <button class="copy-btn" type="button" data-copy="tugas1">Salin Tugas 1 + Parameterku</button>
+            <span class="copy-msg" data-copymsg></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ================= PERTEMUAN 2 (TERKUNCI) ================= -->
+    <style>
+      .lock-card {
+        background: var(--surface); border: 1.5px dashed var(--line-strong); border-radius: 14px;
+        padding: 38px 26px; text-align: center; box-shadow: var(--shadow);
+      }
+      .lock-card .lock-ic {
+        width: 64px; height: 64px; margin: 0 auto 14px; border-radius: 50%;
+        background: var(--warn-soft); border: 1.5px solid var(--warn);
+        display: flex; align-items: center; justify-content: center;
+      }
+      .lock-card h3 { font-size: 21px; margin-bottom: 8px; }
+      .lock-card p { color: var(--ink-soft); max-width: 520px; margin: 0 auto 8px; font-size: 15px; }
+      .lock-card .open-date {
+        display: inline-block; font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 14px;
+        background: var(--chip-bg); border: 1px solid var(--line-strong); border-radius: 8px; padding: 7px 14px; margin: 8px 0 12px;
+      }
+      .lock-status { font-size: 13.5px; font-weight: 600; color: var(--warn); min-height: 21px; }
+    </style>
+    <section class="block" id="pertemuan-2">
+      <div class="wrap">
+        <div class="sec-head"><span class="sec-num">05</span><h2>Pertemuan 2 — Layanan, WiFi, Hotspot &amp; Keamanan</h2></div>
+        <div class="lock-card" id="p2Lock">
+          <div class="lock-ic" aria-hidden="true">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none"><rect x="4.5" y="10" width="15" height="10" rx="2" fill="#9a6206"/><path d="M8 10V7.5a4 4 0 0 1 8 0V10" stroke="#9a6206" stroke-width="2.2"/><circle cx="12" cy="15" r="1.8" fill="#fdf0d5"/></svg>
+          </div>
+          <h3>Pertemuan 2 Masih Terkunci</h3>
+          <p>Materi Pertemuan 2 dikerjakan pada pertemuan berikutnya. Selesaikan dulu seluruh misi simulator, kuis, dan Tugas Pertemuan 1 — itu bekal wajib sebelum masuk materi lanjutan.</p>
+          <span class="open-date">DIBUKA: RABU, 28 OKTOBER 2026 · 00.00 WIB</span>
+          <p class="lock-status" id="p2LockStatus" aria-live="polite">Memeriksa waktu online…</p>
+          <button class="copy-btn ghost" type="button" id="p2Recheck">Periksa Lagi</button>
+          <p style="font-size:12.5px;color:var(--ink-faint);margin-top:10px">Waktu pembukaan diverifikasi dari server waktu online, bukan dari jam perangkatmu — mengubah jam HP tidak akan membuka materi lebih awal.</p>
+        </div>
+        <div id="p2Mount"></div>
+      </div>
+    </section>
+
+    <!-- ================= GLOSARIUM ================= -->
+    <section class="block" id="glosarium">
+      <div class="wrap">
+        <div class="sec-head"><span class="sec-num">06</span><h2>Glosarium Istilah</h2></div>
+        <p class="sec-sub">Kamus mini untuk istilah yang muncul di kedua pertemuan. Kalau saat mengerjakan tugas kamu lupa arti sebuah istilah, cek di sini dulu sebelum bertanya.</p>
+        <dl class="gloss" id="glossList">
+          <div><dt>Winbox</dt><dd>Aplikasi Windows untuk mengkonfigurasi RouterOS lewat tampilan grafis (GUI).</dd></div>
+          <div><dt>RouterOS</dt><dd>Sistem operasi MikroTik yang berjalan di router — otaknya perangkat.</dd></div>
+          <div><dt>Neighbors</dt><dd>Daftar router MikroTik yang terdeteksi di jaringan lokal yang sama, lengkap dengan MAC &amp; IP-nya.</dd></div>
+          <div><dt>MAC Address</dt><dd>Alamat fisik perangkat jaringan di layer 2; dipakai login Winbox saat IP belum ada.</dd></div>
+          <div><dt>Identity</dt><dd>Nama router yang tampil di Winbox dan daftar Neighbors.</dd></div>
+          <div><dt>DHCP Client</dt><dd>Fitur router untuk <i>meminta</i> alamat IP dari jaringan di atasnya (modem/ISP).</dd></div>
+          <div><dt>DHCP Server</dt><dd>Fitur router untuk <i>memberi</i> alamat IP otomatis ke klien di bawahnya.</dd></div>
+          <div><dt>Pool</dt><dd>Rentang alamat IP yang boleh dibagikan DHCP Server ke klien.</dd></div>
+          <div><dt>Lease Time</dt><dd>Lama waktu klien “menyewa” satu alamat IP dari DHCP Server.</dd></div>
+          <div><dt>Gateway</dt><dd>Pintu keluar klien menuju jaringan lain; biasanya IP LAN milik router.</dd></div>
+          <div><dt>NAT Masquerade</dt><dd>Menyamarkan IP privat klien menjadi IP router agar bisa mengakses internet.</dd></div>
+          <div><dt>DNS</dt><dd>Penerjemah nama domain (mis. google.com) menjadi alamat IP.</dd></div>
+        </dl>
+        <p style="font-size:13px;color:var(--ink-faint);margin-top:10px">Istilah lanjutan (Bridge, SSID, Hotspot, Queue, Firewall, Backup) ditambahkan ke daftar ini saat Pertemuan 2 terbuka.</p>
+
+        <div class="note" style="margin-top:22px">
+          <b>Cara pengumpulan tugas:</b> tulis jawaban Tugas 1 dan Tugas 2 di buku laporan / dokumen yang ditentukan guru, lengkap dengan <b>nama, nomor absen, dan kartu parametermu</b> di halaman pertama. Nilai diambil dari ketepatan angka parametermu, urutan langkah yang logis, dan penjelasan dengan bahasamu sendiri. Pertemuan praktik dengan router asli akan memakai konfigurasi yang sama persis dengan yang kamu rancang di sini.
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap">
+        <span><b>Latihan MikroTik · Winbox</b> — bahan latihan pengganti praktik untuk 2 pertemuan.</span>
+        <span class="mono">RouterOS · DHCP · NAT · Bridge · Hotspot · Queue · Firewall</span>
+      </div>
+    </footer>
+
+    <script>
+      "use strict";
+      /* =============== util & matematika IP =============== */
+      function $(sel, root) { return (root || document).querySelector(sel); }
+      function $all(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+      function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+      function ipToInt(ip) { return ip.split(".").reduce(function (a, o) { return ((a << 8) + parseInt(o, 10)) >>> 0; }, 0); }
+      function intToIp(n) { return [24, 16, 8, 0].map(function (s) { return (n >>> s) & 255; }).join("."); }
+      function networkOf(ip, prefix) { var m = prefix === 0 ? 0 : (0xFFFFFFFF << (32 - prefix)) >>> 0; return intToIp((ipToInt(ip) & m) >>> 0); }
+      function broadcastOf(ip, prefix) { var m = prefix === 0 ? 0 : (0xFFFFFFFF << (32 - prefix)) >>> 0; return intToIp(((ipToInt(ip) & m) | (~m >>> 0)) >>> 0); }
+      function usableHosts(prefix) { return Math.pow(2, 32 - prefix) - 2; }
+
+      /* =============== parameter pribadi =============== */
+      var PARAMS = null;
+      function computeParams(nama, absen) {
+        var clean = (nama || "Siswa").trim().replace(/[^a-zA-Z0-9 ]/g, "").trim() || "Siswa";
+        var first = clean.split(/\s+/)[0];
+        var seg = 100 + absen;
+        var base = "192.168." + seg;
+        var poolCount = 30 + absen;
+        var dl = 3 + (absen % 6);
+        return {
+          nama: clean, absen: absen, seg: seg,
+          identity: "R-" + first + "-" + absen,
+          network: base + ".0/24", gateway: base + ".1",
+          broadcast: base + ".255",
+          poolFirst: base + ".50", poolLast: base + "." + (49 + poolCount), poolCount: poolCount,
+          dnsName: "lab" + absen + ".net",
+          ssid: "TJKT-" + first,
+          wifiPass: "tjkt" + absen + first.toLowerCase().replace(/[^a-z0-9]/g, "") + "26",
+          hotspotUser: "siswa" + absen,
+          hotspotPass: "net" + absen + seg,
+          queueDl: dl, queueUl: Math.max(1, Math.floor(dl / 2)),
+          queueTarget: base + ".50"
+        };
+      }
+      function applyTemplates(root) {
+        if (!PARAMS) return;
+        $all("[data-tpl]", root || document).forEach(function (el) {
+          var k = el.getAttribute("data-tpl");
+          if (PARAMS[k] !== undefined) el.textContent = PARAMS[k];
+        });
+        var topo = $("#topoIdentity"); if (topo) topo.textContent = PARAMS.identity + " · RouterOS";
+      }
+      function renderParamCard() {
+        var out = $("#paramOut"); if (!out || !PARAMS) return;
+        var rows = [
+          ["Identity router", PARAMS.identity], ["Jaringan LAN", PARAMS.network],
+          ["IP router / gateway", PARAMS.gateway], ["Broadcast", PARAMS.broadcast],
+          ["DHCP pool", PARAMS.poolFirst + " – " + PARAMS.poolLast + " (" + PARAMS.poolCount + " alamat)"],
+          ["DNS name hotspot", PARAMS.dnsName], ["SSID WiFi (Pertemuan 2)", PARAMS.ssid],
+          ["Password WiFi", PARAMS.wifiPass], ["User hotspot", PARAMS.hotspotUser + " / " + PARAMS.hotspotPass],
+          ["Limit queue (Pertemuan 2)", "Download " + PARAMS.queueDl + "M · Upload " + PARAMS.queueUl + "M → target " + PARAMS.queueTarget]
+        ];
+        out.innerHTML = '<div class="target-box"><h4>KARTU PARAMETER — ' + esc(PARAMS.nama.toUpperCase()) + ' · ABSEN ' + PARAMS.absen + '</h4><dl class="kv">' +
+          rows.map(function (r) { return "<dt>" + esc(r[0]) + "</dt><dd>" + esc(r[1]) + "</dd>"; }).join("") + "</dl></div>" +
+          '<p style="font-size:13px;color:var(--ink-faint);margin-top:10px">Nilai ini sekarang juga terisi otomatis di contoh tugas di bawah. Ingat: angka ini khas milikmu — jawaban tugas harus memakai angka ini.</p>';
+      }
+      var paramForm = $("#paramForm");
+      if (paramForm) paramForm.addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        var absen = parseInt($("#inAbsen").value, 10);
+        var nama = $("#inNama").value;
+        if (!nama.trim()) { $("#paramOut").innerHTML = '<p style="color:var(--bad);font-weight:600">Isi dulu nama panggilanmu.</p>'; return; }
+        if (isNaN(absen) || absen < 1 || absen > 40) { $("#paramOut").innerHTML = '<p style="color:var(--bad);font-weight:600">Nomor absen harus antara 1 sampai 40.</p>'; return; }
+        PARAMS = computeParams(nama, absen);
+        renderParamCard();
+        applyTemplates(document);
+        if (window.__onParams) window.__onParams(PARAMS);
+      });
+
+      /* =============== salin tugas =============== */
+      function paramText() {
+        if (!PARAMS) return "(Kartu parameter belum dibuat — buat dulu di bagian Parameter Pribadi.)";
+        return "Nama: " + PARAMS.nama + " · Absen: " + PARAMS.absen + "\n" +
+          "Identity: " + PARAMS.identity + " · Network: " + PARAMS.network + " · Gateway: " + PARAMS.gateway + "\n" +
+          "DHCP pool: " + PARAMS.poolFirst + " – " + PARAMS.poolLast + " · DNS name: " + PARAMS.dnsName + "\n" +
+          "SSID: " + PARAMS.ssid + " · Password WiFi: " + PARAMS.wifiPass + " · User hotspot: " + PARAMS.hotspotUser + " / " + PARAMS.hotspotPass + "\n" +
+          "Queue: download " + PARAMS.queueDl + "M, upload " + PARAMS.queueUl + "M, target " + PARAMS.queueTarget;
+      }
+      document.addEventListener("click", function (ev) {
+        var btn = ev.target.closest ? ev.target.closest("[data-copy]") : null;
+        if (!btn) return;
+        var kind = btn.getAttribute("data-copy");
+        var list = document.getElementById(kind === "tugas1" ? "tugas1List" : "tugas2List");
+        var title = kind === "tugas1" ? "TUGAS PERTEMUAN 1 — Operasi Internet Pertama" : "TUGAS PERTEMUAN 2";
+        var body = list ? list.innerText : "";
+        var text = title + "\n\nPARAMETER PRIBADI SAYA:\n" + paramText() + "\n\nISI TUGAS:\n" + body;
+        var msg = btn.parentElement.querySelector("[data-copymsg]");
+        function done(ok) { if (msg) { msg.textContent = ok ? "Tersalin! Tempel ke dokumen laporanmu." : "Gagal menyalin otomatis — salin manual dari halaman."; } }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+        } else { done(false); }
+      });
+    </script>
+
+    <script>
+      "use strict";
+      /* =============== SIMULATOR WINBOX =============== */
+      var SIM = { identity: "MikroTik", panel: "interfaces" };
+      var SIM_PANELS = {
+        "interfaces": { title: "Interface List", toolbar: ["+ Add", "Enable", "Disable", "Comment"], html:
+          '<p class="wb-pane-title">Interface List</p><table><thead><tr><th></th><th>Name</th><th>Type</th><th>Actual MTU</th><th>Status</th></tr></thead><tbody>' +
+          '<tr><td class="flag">R</td><td class="mono">ether1</td><td>Ethernet</td><td>1500</td><td>running · WAN</td></tr>' +
+          '<tr><td class="flag">R</td><td class="mono">ether2</td><td>Ethernet</td><td>1500</td><td>running · LAN</td></tr>' +
+          '<tr><td class="flag">R</td><td class="mono">ether3</td><td>Ethernet</td><td>1500</td><td>running · LAN</td></tr>' +
+          '<tr><td></td><td class="mono">ether4</td><td>Ethernet</td><td>1500</td><td>no link</td></tr>' +
+          '<tr><td></td><td class="mono">ether5</td><td>Ethernet</td><td>1500</td><td>no link</td></tr>' +
+          '<tr><td></td><td class="mono">wlan1</td><td>Wireless</td><td>1500</td><td>disabled · materi Pertemuan 2</td></tr>' +
+          '<tr><td></td><td class="mono">bridge1</td><td>Bridge</td><td>1500</td><td>dibuat di Pertemuan 2</td></tr></tbody></table>' +
+          '<p style="margin-top:8px;color:#5b7186">Flag <b>R</b> = running (kabel terpasang &amp; link aktif). Di Winbox asli, klik dua kali baris untuk membuka detail interface.</p>' },
+        "bridge": { title: "Bridge", toolbar: ["+ Add", "Ports"], html:
+          '<p class="wb-pane-title">Bridge</p><table><thead><tr><th>Name</th><th>Protocol Mode</th><th>Ports</th><th>Keterangan</th></tr></thead><tbody>' +
+          '<tr><td class="mono">bridge1</td><td>none</td><td class="mono">ether2, ether3, wlan1</td><td>dibangun di Pertemuan 2</td></tr></tbody></table>' +
+          '<p style="margin-top:8px;color:#5b7186">Bridge menggabungkan port menjadi satu jaringan. Setelah port masuk bridge, IP &amp; DHCP dipasang di bridge-nya.</p>' },
+        "wireless": { title: "Wireless Tables", toolbar: ["Security Profiles", "Access List"], html:
+          '<p class="wb-pane-title">WiFi Interfaces</p><table><thead><tr><th></th><th>Name</th><th>Mode</th><th>SSID</th><th>Band</th></tr></thead><tbody>' +
+          '<tr><td class="dyn">X</td><td class="mono">wlan1</td><td>ap bridge</td><td class="mono">(belum diatur)</td><td>2GHz-B/G/N</td></tr></tbody></table>' +
+          '<p style="margin-top:8px;color:#5b7186">Flag <b>X</b> = disabled. Menghidupkan WiFi adalah materi Pertemuan 2 — termasuk membuat Security Profile WPA2 lebih dulu.</p>' },
+        "addresses": { title: "Address List", toolbar: ["+ Add", "Enable", "Disable"], html:
+          '<p class="wb-pane-title">IP Addresses</p><table><thead><tr><th></th><th>Address</th><th>Network</th><th>Interface</th></tr></thead><tbody>' +
+          '<tr><td></td><td class="mono">192.168.88.1/24</td><td class="mono">192.168.88.0</td><td class="mono">ether2</td></tr>' +
+          '<tr><td class="dyn">D</td><td class="mono">172.16.8.25/24</td><td class="mono">172.16.8.0</td><td class="mono">ether1 · dari DHCP Client</td></tr></tbody></table>' +
+          '<p style="margin-top:8px;color:#5b7186">Flag <b>D</b> = dynamic, diberikan otomatis oleh DHCP Client — tidak bisa diedit manual. Alamat statis 192.168.88.1/24 adalah gateway klien.</p>' },
+        "dhcp-client": { title: "DHCP Client", toolbar: ["+ Add", "Renew", "Release"], html:
+          '<p class="wb-pane-title">DHCP Client</p><table><thead><tr><th>Interface</th><th>Status</th><th>IP Address</th><th>Gateway</th><th>Expires After</th></tr></thead><tbody>' +
+          '<tr><td class="mono">ether1</td><td><b style="color:#177245">bound</b></td><td class="mono">172.16.8.25/24</td><td class="mono">172.16.8.1</td><td>23:41:07</td></tr></tbody></table>' +
+          '<p style="margin-top:8px;color:#5b7186">Status <b>bound</b> artinya router berhasil menyewa IP dari jaringan atas. Status <i>searching…</i> yang tidak berhenti = kabel WAN atau server di atasnya bermasalah.</p>' },
+        "dhcp-server": { title: "DHCP Server", toolbar: ["DHCP Setup"], primary: 0, html:
+          '<p class="wb-pane-title">DHCP Servers</p><table><thead><tr><th>Name</th><th>Interface</th><th>Address Pool</th><th>Lease Time</th></tr></thead><tbody>' +
+          '<tr><td class="mono">dhcp1</td><td class="mono">ether2</td><td class="mono">192.168.88.10 – 192.168.88.254</td><td>3d 00:00:00</td></tr></tbody></table>' +
+          '<p style="margin-top:8px;color:#5b7186">Tombol <b>DHCP Setup</b> di toolbar menjalankan wizard: pilih interface → network → gateway → pool → DNS → lease time. Server ini yang membagikan IP ke klien LAN.</p>' },
+        "dns": { title: "DNS Settings", toolbar: ["Static", "Cache"], html:
+          '<p class="wb-pane-title">DNS Settings</p><div class="wb-form">' +
+          '<label>Servers <input value="8.8.8.8" readonly></label>' +
+          '<label>Dynamic Servers <input value="1.1.1.1" readonly></label>' +
+          '<label>Allow Remote Requests <span class="wb-check"><span class="cb">✓</span> aktif — router meneruskan DNS klien</span></label></div>' +
+          '<p style="margin-top:10px;color:#5b7186">Kalau kotak ini tidak dicentang: ping ke alamat IP tetap jalan, tapi membuka nama situs gagal.</p>' },
+        "firewall": { title: "Firewall · NAT", toolbar: ["Filter Rules", "NAT", "Mangle"], html:
+          '<p class="wb-pane-title">Firewall — tab NAT</p><table><thead><tr><th></th><th>Chain</th><th>Out. Interface</th><th>Action</th><th>Keterangan</th></tr></thead><tbody>' +
+          '<tr><td class="flag">0</td><td class="mono">srcnat</td><td class="mono">ether1</td><td class="mono"><b>masquerade</b></td><td>syarat internet klien</td></tr></tbody></table>' +
+          '<p style="margin-top:8px;color:#5b7186">Satu baris kecil ini yang membuat semua IP privat klien disamarkan menjadi IP router saat keluar ke internet. Tab Filter Rules dipakai di Pertemuan 2.</p>' },
+        "hotspot": { title: "Hotspot", toolbar: ["Hotspot Setup"], primary: 0, html:
+          '<p class="wb-pane-title">Hotspot Servers</p><table><thead><tr><th>Name</th><th>Interface</th><th>Profile</th><th>Status</th></tr></thead><tbody>' +
+          '<tr><td class="mono">(belum ada)</td><td class="mono">—</td><td class="mono">—</td><td>materi Pertemuan 2</td></tr></tbody></table>' +
+          '<p style="margin-top:8px;color:#5b7186">Hotspot membuat klien wajib login lewat halaman web sebelum internetan. Dibangun dengan wizard <b>Hotspot Setup</b> di Pertemuan 2.</p>' },
+        "routes": { title: "Route List", toolbar: ["+ Add"], html:
+          '<p class="wb-pane-title">Routes</p><table><thead><tr><th></th><th>Dst. Address</th><th>Gateway</th><th>Keterangan</th></tr></thead><tbody>' +
+          '<tr><td class="dyn">DAd</td><td class="mono">0.0.0.0/0</td><td class="mono">172.16.8.1 reachable ether1</td><td>default route dari DHCP Client</td></tr>' +
+          '<tr><td class="dyn">DAC</td><td class="mono">192.168.88.0/24</td><td class="mono">ether2 reachable</td><td>jaringan LAN sendiri</td></tr>' +
+          '<tr><td class="dyn">DAC</td><td class="mono">172.16.8.0/24</td><td class="mono">ether1 reachable</td><td>jaringan sisi WAN</td></tr></tbody></table>' +
+          '<p style="margin-top:8px;color:#5b7186">Baris 0.0.0.0/0 adalah “jalan ke mana-mana”: paket yang tujuannya tidak dikenal dikirim ke gateway atas.</p>' },
+        "identity": { title: "Identity", toolbar: [], html:
+          '<p class="wb-pane-title">Identity — nama router</p><div class="wb-form">' +
+          '<label>Name <input id="simIdentityInput" type="text" value="MikroTik" maxlength="40"></label></div>' +
+          '<p style="margin-top:10px;color:#5b7186">Isi nama baru lalu tekan <b>Apply</b>. Nama akan muncul di title bar jendela ini, seperti di Winbox asli. Misi 5 hanya selesai lewat tombol Apply.</p>' +
+          '<p style="margin-top:10px"><button class="wb-tbtn primary" id="simIdentityApply" type="button">Apply</button> <button class="wb-tbtn" id="simIdentityOk" type="button">OK</button></p>' },
+        "users": { title: "Users", toolbar: ["+ Add", "Groups"], html:
+          '<p class="wb-pane-title">System Users</p><table><thead><tr><th>Name</th><th>Group</th><th>Last Logged In</th></tr></thead><tbody>' +
+          '<tr><td class="mono">admin</td><td class="mono">full</td><td>baru saja · via Winbox</td></tr>' +
+          '<tr><td class="mono">guru-tamu</td><td class="mono">read</td><td>—</td></tr></tbody></table>' +
+          '<p style="margin-top:8px;color:#5b7186">Grup <b>full</b> boleh mengubah apa pun; <b>read</b> hanya boleh melihat. Mengganti password admin &amp; menambah user dibahas di Pertemuan 2. Ingat: ini user Winbox, <i>bukan</i> user hotspot.</p>' },
+        "reset": { title: "Reset Configuration", toolbar: [], html:
+          '<p class="wb-pane-title">Reset Configuration</p>' +
+          '<p style="margin-bottom:10px">Opsi reset yang tersedia:</p>' +
+          '<p class="wb-check" style="display:flex;margin-bottom:6px"><span class="cb">✓</span> No Default Configuration — mulai dari kosong total</p>' +
+          '<p class="wb-check" style="display:flex;margin-bottom:6px"><span class="cb"></span> Keep User Configuration — pertahankan user &amp; password</p>' +
+          '<p class="wb-check" style="display:flex;margin-bottom:12px"><span class="cb"></span> No Backup — tanpa membuat file cadangan dulu</p>' +
+          '<button class="wb-tbtn" id="simResetBtn" type="button">Reset Configuration</button>' +
+          '<p style="margin-top:10px;color:#5b7186">Di simulator tombol ini tidak benar-benar me-reset. Di router asli: setelah reset tanpa default, router tidak punya IP — masuk lagi hanya lewat MAC Address.</p>' },
+        "queues": { title: "Simple Queues", toolbar: ["+ Add"], html:
+          '<p class="wb-pane-title">Simple Queues</p><table><thead><tr><th></th><th>Name</th><th>Target</th><th>Max Limit (Up/Down)</th></tr></thead><tbody>' +
+          '<tr><td class="flag">0</td><td class="mono">Limit-Klien</td><td class="mono">192.168.88.10</td><td class="mono">2M / 5M</td></tr></tbody></table>' +
+          '<p style="margin-top:8px;color:#5b7186">Queue membatasi kecepatan per target. Membuat queue dengan nilai parameter pribadi adalah materi Pertemuan 2.</p>' },
+        "files": { title: "File List", toolbar: ["Backup", "Restore", "Upload"], html:
+          '<p class="wb-pane-title">Files</p><table><thead><tr><th>Name</th><th>Type</th><th>Size</th></tr></thead><tbody>' +
+          '<tr><td class="mono">backup-lab.backup</td><td>backup</td><td>48.2 KiB</td></tr>' +
+          '<tr><td class="mono">config-lab.rsc</td><td>script</td><td>3.1 KiB</td></tr>' +
+          '<tr><td class="mono">hotspot/</td><td>directory</td><td>—</td></tr></tbody></table>' +
+          '<p style="margin-top:8px;color:#5b7186">File .backup untuk restore utuh; file .rsc hasil export bisa dibuka &amp; dibaca isinya. Keduanya dibuat di Pertemuan 2.</p>' },
+        "log": { title: "Log", toolbar: ["Clear"], html:
+          '<p class="wb-pane-title">Log</p><div class="wb-term">' +
+          '<span class="dim">07:12:03</span> system,info router rebooted<br>' +
+          '<span class="dim">07:12:19</span> dhcp,info dhcp1 deassigned 192.168.88.10 from AA:BB:CC:01:02:03<br>' +
+          '<span class="dim">07:13:44</span> dhcp,info dhcp1 assigned 192.168.88.10 to AA:BB:CC:01:02:03 <span class="grn">← klien dapat IP</span><br>' +
+          '<span class="dim">07:15:02</span> system,info,account user admin logged in from 192.168.88.10 via winbox<br>' +
+          '<span class="dim">07:16:37</span> firewall,info <span class="red">drop input dari 203.0.113.9</span> <span class="dim">← contoh bila firewall aktif</span></div>' +
+          '<p style="margin-top:8px;color:#5b7186">Log adalah buku harian router. Saat troubleshooting, log sering memberi petunjuk pertama tentang apa yang terjadi.</p>' },
+        "terminal": { title: "New Terminal", toolbar: [], html:
+          '<p class="wb-pane-title">Terminal RouterOS</p><div class="wb-term">' +
+          '<span class="dim">[admin@MikroTik] &gt;</span> ping 8.8.8.8 count=3<br>' +
+          '&nbsp;&nbsp;8.8.8.8&nbsp;&nbsp;64 byte ping: ttl=117 time=18ms<br>&nbsp;&nbsp;8.8.8.8&nbsp;&nbsp;64 byte ping: ttl=117 time=17ms<br>' +
+          '<span class="grn">&nbsp;&nbsp;--- 3 packets transmitted, 3 received, 0% loss ---</span><br>' +
+          '<span class="dim">[admin@MikroTik] &gt;</span> /ip address print<br>&nbsp;&nbsp;0&nbsp;&nbsp;192.168.88.1/24&nbsp;&nbsp;192.168.88.0&nbsp;&nbsp;ether2<br>' +
+          '<span class="dim">[admin@MikroTik] &gt;</span> _</div>' +
+          '<p style="margin-top:8px;color:#5b7186">Semua yang bisa diklik di Winbox punya padanan perintah teks. Teknisi yang baik hafal jalur menu <i>dan</i> perintah dasarnya.</p>' }
+      };
+      var SIM_MENU = [
+        { id: "interfaces", label: "Interfaces" },
+        { id: "bridge", label: "Bridge" },
+        { id: "wireless", label: "Wireless" },
+        { group: "IP" },
+        { id: "addresses", label: "Addresses", child: true },
+        { id: "dhcp-client", label: "DHCP Client", child: true },
+        { id: "dhcp-server", label: "DHCP Server", child: true },
+        { id: "dns", label: "DNS", child: true },
+        { id: "firewall", label: "Firewall", child: true },
+        { id: "hotspot", label: "Hotspot", child: true },
+        { id: "routes", label: "Routes", child: true },
+        { id: "queues", label: "Queues" },
+        { group: "System" },
+        { id: "identity", label: "Identity", child: true },
+        { id: "users", label: "Users", child: true },
+        { id: "reset", label: "Reset Configuration", child: true },
+        { id: "files", label: "Files" },
+        { id: "log", label: "Log" },
+        { id: "terminal", label: "New Terminal" }
+      ];
+      var MISSIONS = [
+        { id: "m1", target: "interfaces", name: "Misi 1 — Kenali Perangkatmu", desc: "Buka daftar interface dan temukan ether1, ether2, dan wlan1." },
+        { id: "m2", target: "addresses", name: "Misi 2 — Cari Alamat Router", desc: "Buka IP → Addresses. Alamat mana yang jadi gateway klien?" },
+        { id: "m3", target: "dhcp-server", name: "Misi 3 — Pembagi IP Otomatis", desc: "Buka IP → DHCP Server dan perhatikan tombol DHCP Setup." },
+        { id: "m4", target: "firewall", name: "Misi 4 — Jembatan ke Internet", desc: "Buka IP → Firewall, tab NAT. Baca chain dan action-nya." },
+        { id: "m5", target: "identity-apply", name: "Misi 5 — Beri Nama Router", desc: "System → Identity: ganti nama router lalu tekan Apply. Membuka menu saja tidak cukup!" },
+        { id: "m6", target: "queues", name: "Misi 6 — Intip Pembatas Bandwidth", desc: "Buka Queues dan baca target serta max limit-nya." },
+        { id: "m7", target: "users", name: "Misi 7 — Siapa Saja Penggunanya", desc: "Buka System → Users. Bedakan grup full dan read." },
+        { id: "m8", target: "log", name: "Misi 8 — Baca Buku Harian Router", desc: "Buka Log dan temukan baris saat klien mendapat IP." }
+      ];
+      var missionDone = {};
+      function setStatus(txt, ok) { var s = $("#wbStatus"); if (s) { s.innerHTML = txt; s.className = ok ? "ok" : ""; } }
+      function renderMissions() {
+        var list = $("#missionList"); if (!list) return;
+        list.innerHTML = MISSIONS.map(function (m) {
+          var done = !!missionDone[m.id];
+          return '<li class="' + (done ? "done" : "") + '"><span class="st">✓</span><div><b>' + esc(m.name) + '</b><span>' + esc(m.desc) + '</span></div></li>';
+        }).join("");
+        var n = MISSIONS.filter(function (m) { return missionDone[m.id]; }).length;
+        $("#missionCount").textContent = n + " / " + MISSIONS.length;
+        $("#missionBar").style.width = (n / MISSIONS.length * 100) + "%";
+        if (n === MISSIONS.length) $("#missionMsg").textContent = "Semua misi selesai! Kamu berhak atas badge: PENJELAJAH WINBOX. Sekarang taklukkan kuis dan tugas Pertemuan 1.";
+      }
+      function completeMission(id) {
+        if (missionDone[id]) return;
+        missionDone[id] = true;
+        var m = MISSIONS.filter(function (x) { return x.id === id; })[0];
+        $("#missionMsg").textContent = "Mantap — " + (m ? m.name : "misi") + " selesai.";
+        renderMissions();
+      }
+      function checkPanelMission(panelId) {
+        MISSIONS.forEach(function (m) { if (m.target === panelId) completeMission(m.id); });
+      }
+      function renderSimPanel() {
+        var p = SIM_PANELS[SIM.panel];
+        $all("#wbMenu button").forEach(function (b) { b.classList.toggle("active", b.getAttribute("data-panel") === SIM.panel); });
+        $("#wbToolbar").innerHTML = p.toolbar.map(function (t, i) {
+          return '<button type="button" class="wb-tbtn' + (p.primary === i ? " primary" : "") + '" data-tb="' + esc(t) + '">' + esc(t) + "</button>";
+        }).join("") || '<span style="font-size:12.5px;color:#5b7186">' + esc(p.title) + "</span>";
+        $("#wbContent").innerHTML = p.html;
+        var inp = $("#simIdentityInput");
+        if (inp) { inp.value = SIM.identity; if (window.__paramsRef) inp.value = window.__paramsRef.identity; }
+        var apply = $("#simIdentityApply"), ok = $("#simIdentityOk");
+        function doApply() {
+          var v = (inp.value || "").trim(); if (!v) return;
+          SIM.identity = v;
+          $("#wbTitle").textContent = "admin@192.168.88.1 (" + v + ") — WinBox";
+          setStatus("Identity diubah menjadi “" + v + "”", true);
+          completeMission("m5");
+        }
+        if (apply) apply.addEventListener("click", doApply);
+        if (ok) ok.addEventListener("click", doApply);
+        var rb = $("#simResetBtn");
+        if (rb) rb.addEventListener("click", function () { setStatus("Simulator: reset dibatalkan — di router asli, sesudah ini kamu harus login lagi via MAC Address.", false); });
+        checkPanelMission(SIM.panel);
+      }
+      function buildSimMenu() {
+        var nav = $("#wbMenu"); if (!nav) return;
+        nav.innerHTML = SIM_MENU.map(function (it) {
+          if (it.group) return '<span class="group-label">' + esc(it.group) + "</span>";
+          return '<button type="button" data-panel="' + it.id + '" class="' + (it.child ? "child" : "") + '"><span class="dot"></span>' + esc(it.label) + "</button>";
+        }).join("");
+        nav.addEventListener("click", function (ev) {
+          var b = ev.target.closest ? ev.target.closest("button[data-panel]") : null;
+          if (!b) return;
+          SIM.panel = b.getAttribute("data-panel");
+          renderSimPanel();
+          setStatus("Membuka " + SIM_PANELS[SIM.panel].title, false);
+        });
+        $("#wbToolbar").addEventListener("click", function (ev) {
+          var b = ev.target.closest ? ev.target.closest("button[data-tb]") : null;
+          if (!b) return;
+          setStatus("Tombol “" + b.getAttribute("data-tb") + "” — di simulator cukup dibaca fungsinya dari panel.", false);
+        });
+        var rst = $("#missionReset");
+        if (rst) rst.addEventListener("click", function () { missionDone = {}; $("#missionMsg").textContent = "Misi diulang dari awal. Semangat!"; renderMissions(); });
+      }
+      buildSimMenu();
+      renderSimPanel();
+      renderMissions();
+      window.__onParams = function (p) {
+        window.__paramsRef = p;
+        if (SIM.panel === "identity") { var inp = $("#simIdentityInput"); if (inp) inp.value = p.identity; }
+      };
+    </script>
+
+    <script>
+      "use strict";
+      /* =============== MESIN KUIS — jawaban dihitung dari skenario, bukan dicocokkan ke kunci =============== */
+      function renderQuiz(el, questions, title) {
+        if (!el) return;
+        var state = questions.map(function () { return null; });
+        function score() { return state.filter(function (s) { return s && s.ok; }).length; }
+        function draw() {
+          el.innerHTML =
+            '<div class="quiz-top"><h3>' + esc(title) + '</h3><span class="score-pill">Skor: ' + score() + " / " + questions.length + "</span></div>" +
+            '<p style="font-size:13.5px;color:var(--ink-soft)">Klik satu jawaban per soal. Nilai dihitung langsung dari data skenario di soal — baca angkanya baik-baik, sebagian opsi adalah jebakan hitung.</p>' +
+            questions.map(function (q, qi) {
+              var answered = state[qi] !== null;
+              return '<div class="q"><p class="qtext"><span class="qn">SOAL ' + (qi + 1) + "</span>" + q.ask + '</p><div class="opts">' +
+                q.options.map(function (o, oi) {
+                  var cls = "";
+                  if (answered) {
+                    var isRight = q.check(q.sd, o.v);
+                    if (isRight) cls = "correct";
+                    else if (state[qi] && state[qi].v === o.v) cls = "wrong";
+                  }
+                  return '<button type="button" class="opt ' + cls + '" data-q="' + qi + '" data-o="' + oi + '"' + (answered ? " disabled" : "") + '><span class="letter">' + "ABCD"[oi] + "</span><span" + (o.mono ? ' class="mono" style="font-size:13px"' : "") + ">" + esc(o.t) + "</span></button>";
+                }).join("") + "</div>" +
+                (answered ? '<div class="explain show"><b>' + (state[qi].ok ? "Benar. " : "Belum tepat. ") + "</b>" + q.why(q.sd) + "</div>" : "") +
+                "</div>";
+            }).join("") +
+            '<div class="quiz-foot">' +
+            (state.every(function (s) { return s !== null; })
+              ? '<span class="quiz-result">Hasil akhir: ' + score() + " dari " + questions.length + " benar." + (score() === questions.length ? " Sempurna — kamu siap naik ke tugas!" : score() >= questions.length - 2 ? " Bagus! Baca lagi penjelasan soal yang meleset." : " Ulangi membaca materi, lalu coba lagi.") + "</span>"
+              : '<span class="quiz-result">Jawab semua soal untuk melihat hasil akhir.</span>') +
+            '<button type="button" class="copy-btn ghost" data-reset>Ulangi Kuis</button></div>';
+          $all("[data-reset]", el).forEach(function (b) { b.addEventListener("click", function () { state = questions.map(function () { return null; }); draw(); }); });
+          $all(".opt", el).forEach(function (b) {
+            b.addEventListener("click", function () {
+              var qi = parseInt(b.getAttribute("data-q"), 10), oi = parseInt(b.getAttribute("data-o"), 10);
+              if (state[qi] !== null) return;
+              var q = questions[qi], opt = q.options[oi];
+              state[qi] = { v: opt.v, ok: q.check(q.sd, opt.v) };
+              draw();
+            });
+          });
+        }
+        draw();
+      }
+
+      /* =============== KUIS PERTEMUAN 1 =============== */
+      var QUIZ1 = [
+        {
+          sd: { ip: "192.168.214.37", prefix: 24 },
+          ask: "Sebuah PC klien menerima alamat <span class='mono'>192.168.214.37/24</span> dari DHCP Server. Ke alamat mana PC itu mengirim paket broadcast untuk jaringan tersebut?",
+          options: [
+            { t: "192.168.214.0", v: "192.168.214.0" },
+            { t: "192.168.214.1", v: "192.168.214.1" },
+            { t: "192.168.214.254", v: "192.168.214.254" },
+            { t: "192.168.214.255", v: "192.168.214.255" }
+          ],
+          check: function (sd, v) { return v === broadcastOf(sd.ip, sd.prefix); },
+          why: function (sd) { return "Pada /24, alamat network-nya " + networkOf(sd.ip, sd.prefix) + " dan broadcast adalah alamat terakhir segmen itu — semua bit host bernilai 1 — yaitu " + broadcastOf(sd.ip, sd.prefix) + ". Alamat .254 hanya alamat host biasa (sering tertukar karena jadi akhir pool), dan .1 adalah gateway."; }
+        },
+        {
+          sd: { prefix: 27 },
+          ask: "Guru membagi jaringan kelas dengan prefix <span class='mono'>/27</span>. Berapa banyak alamat yang benar-benar bisa dipakai host dalam satu segmen itu?",
+          options: [
+            { t: "32 alamat", v: "32" },
+            { t: "30 alamat", v: "30" },
+            { t: "28 alamat", v: "28" },
+            { t: "62 alamat", v: "62" }
+          ],
+          check: function (sd, v) { return parseInt(v, 10) === usableHosts(sd.prefix); },
+          why: function (sd) { return "/27 menyisakan 5 bit host → 2^5 = 32 alamat total. Kurangi alamat network dan broadcast: 32 − 2 = " + usableHosts(sd.prefix) + " alamat usable. Angka 62 itu milik /26 — jebakan klasik kalau asal hafal."; }
+        },
+        {
+          sd: { seg: 88, start: 50, count: 47 },
+          ask: "DHCP Setup diatur: pool dimulai di <span class='mono'>192.168.88.50</span> dan berisi tepat <b>47 alamat</b>. Alamat terakhir pool tersebut adalah…",
+          options: [
+            { t: "192.168.88.49", v: "192.168.88.49" },
+            { t: "192.168.88.96", v: "192.168.88.96" },
+            { t: "192.168.88.97", v: "192.168.88.97" },
+            { t: "192.168.88.100", v: "192.168.88.100" }
+          ],
+          check: function (sd, v) { return v === "192.168." + sd.seg + "." + (sd.start + sd.count - 1); },
+          why: function (sd) { return "Alamat terakhir = awal + jumlah − 1 = 50 + 47 − 1 = " + (sd.start + sd.count - 1) + ". Yang menjawab .97 biasanya lupa bahwa alamat awal (.50) ikut terhitung sebagai alamat pertama."; }
+        },
+        {
+          sd: { wan: "ether1", lan: "ether2" },
+          ask: "Topologi kelas: <span class='mono'>ether1</span> = WAN ke modem, <span class='mono'>ether2</span> = LAN ke klien. Aturan NAT mana yang membuat klien bisa internetan?",
+          options: [
+            { t: "chain=srcnat · out-interface=ether2 · action=masquerade", v: "srcnat|ether2|masquerade", mono: true },
+            { t: "chain=dstnat · out-interface=ether1 · action=masquerade", v: "dstnat|ether1|masquerade", mono: true },
+            { t: "chain=srcnat · out-interface=ether1 · action=masquerade", v: "srcnat|ether1|masquerade", mono: true },
+            { t: "chain=srcnat · out-interface=ether1 · action=dst-nat", v: "srcnat|ether1|dst-nat", mono: true }
+          ],
+          check: function (sd, v) { var p = v.split("|"); return p[0] === "srcnat" && p[1] === sd.wan && p[2] === "masquerade"; },
+          why: function (sd) { return "Masquerade bekerja pada paket yang <i>keluar</i> menuju internet: chain harus srcnat, out-interface harus interface WAN (" + sd.wan + "), dan action masquerade. Memasang di " + sd.lan + " berarti menyamarkan paket di sisi yang salah — klien tetap tidak bisa keluar."; }
+        },
+        {
+          sd: { wan: "ether1", lan: "ether2" },
+          ask: "Masih pada topologi yang sama (ether1 WAN, ether2 LAN). Kombinasi DHCP mana yang benar arahnya?",
+          options: [
+            { t: "DHCP Client di ether2 · DHCP Server di ether1", v: "ether2|ether1", mono: true },
+            { t: "DHCP Client di ether1 · DHCP Server di ether2", v: "ether1|ether2", mono: true },
+            { t: "DHCP Client di ether1 · DHCP Server di ether1", v: "ether1|ether1", mono: true },
+            { t: "DHCP Client di ether2 · DHCP Server di ether2", v: "ether2|ether2", mono: true }
+          ],
+          check: function (sd, v) { var p = v.split("|"); return p[0] === sd.wan && p[1] === sd.lan; },
+          why: function (sd) { return "Client = meminta ke atas (pasang di WAN, " + sd.wan + "). Server = memberi ke bawah (pasang di LAN, " + sd.lan + "). Tertukar arah adalah kesalahan paling sering terjadi di praktik — dan gejalanya membingungkan karena router tetap “terlihat normal”."; }
+        },
+        {
+          sd: { ip: "192.168.77.130", prefix: 26 },
+          ask: "Siswa mengatur alamat <span class='mono'>192.168.77.130/26</span> di ether2. Kolom Network akan terisi otomatis dengan…",
+          options: [
+            { t: "192.168.77.0", v: "192.168.77.0" },
+            { t: "192.168.77.64", v: "192.168.77.64" },
+            { t: "192.168.77.128", v: "192.168.77.128" },
+            { t: "192.168.77.192", v: "192.168.77.192" }
+          ],
+          check: function (sd, v) { return v === networkOf(sd.ip, sd.prefix); },
+          why: function (sd) { return "/26 membagi oktet terakhir per 64 alamat: blok-bloknya .0, .64, .128, .192. Alamat .130 jatuh di blok yang mulai " + networkOf(sd.ip, sd.prefix) + " — jadi itulah network-nya. Soal ini tidak bisa dijawab dengan hafalan “network selalu berakhiran .0”."; }
+        }
+      ];
+      renderQuiz($("#quiz1"), QUIZ1, "Kuis Pertemuan 1 — Kasus & Hitungan");
+
+      /* Kit untuk fragmen Pertemuan 2 (dimuat terpisah setelah gerbang tanggal) */
+      window.LatihanKit = {
+        renderQuiz: renderQuiz, networkOf: networkOf, broadcastOf: broadcastOf,
+        usableHosts: usableHosts, esc: esc, $: $, $all: $all,
+        getParams: function () { return PARAMS; }, applyTemplates: applyTemplates
+      };
+    </script>
+
+    <script>
+      "use strict";
+      /* =============== GERBANG TANGGAL PERTEMUAN 2 ===============
+         Materi Pertemuan 2 TIDAK ada di file ini. Ia dimuat dari file
+         fragmen terpisah hanya jika waktu ONLINE (bukan jam perangkat)
+         sudah melewati Rabu, 28 Oktober 2026 pukul 00.00 WIB.
+         Jika waktu online tidak bisa diverifikasi -> tetap terkunci. */
+      var P2_UNLOCK_MS = Date.parse("2026-10-28T00:00:00+07:00");
+      var p2Loaded = false;
+      function fmtWIB(ms) {
+        try { return new Intl.DateTimeFormat("id-ID", { timeZone: "Asia/Jakarta", weekday: "long", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(ms)); }
+        catch (e) { return new Date(ms).toString(); }
+      }
+      function fetchOnlineNow() {
+        var sources = [
+          function () {
+            return fetch("https://worldtimeapi.org/api/timezone/Asia/Jakarta", { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (j) {
+              if (j && j.unixtime) return j.unixtime * 1000;
+              if (j && j.datetime) return Date.parse(j.datetime);
+              throw new Error("bad");
+            });
+          },
+          function () {
+            return fetch("https://timeapi.io/api/time/current/zone?timeZone=Asia%2FJakarta", { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (j) {
+              if (j && j.dateTime) return Date.parse(j.dateTime + "+07:00");
+              throw new Error("bad");
+            });
+          },
+          function () {
+            return fetch("https://worldclockapi.com/api/json/utc/now", { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (j) {
+              if (j && j.currentDateTime) return Date.parse(j.currentDateTime);
+              throw new Error("bad");
+            });
+          }
+        ];
+        var chain = Promise.reject(new Error("start"));
+        sources.forEach(function (fn) { chain = chain.catch(fn); });
+        return chain.then(function (ms) { return (typeof ms === "number" && isFinite(ms)) ? ms : null; }, function () { return null; });
+      }
+      function loadP2() {
+        if (p2Loaded) return;
+        p2Loaded = true;
+        var st = document.getElementById("p2LockStatus");
+        if (st) st.textContent = "Waktu terverifikasi — memuat materi Pertemuan 2…";
+        var sc = document.createElement("script");
+        sc.src = "pertemuan-2.js";
+        sc.onload = function () {
+          if (window.__P2_HTML && window.__initP2) {
+            var lock = document.getElementById("p2Lock");
+            if (lock) lock.style.display = "none";
+            var mount = document.getElementById("p2Mount");
+            mount.innerHTML = window.__P2_HTML;
+            window.__initP2(window.LatihanKit);
+            if (window.LatihanKit) window.LatihanKit.applyTemplates(mount);
+            mount.scrollIntoView({ behavior: "smooth", block: "start" });
+          } else if (st) { st.textContent = "File materi gagal dibaca. Muat ulang halaman."; }
+        };
+        sc.onerror = function () { if (st) st.textContent = "Gagal memuat file materi. Periksa koneksi internet lalu coba lagi."; p2Loaded = false; };
+        document.body.appendChild(sc);
+      }
+      function checkP2Gate() {
+        var st = document.getElementById("p2LockStatus");
+        if (!st) return;
+        st.textContent = "Memeriksa waktu online…";
+        fetchOnlineNow().then(function (now) {
+          if (now === null) {
+            st.textContent = "Waktu online tidak dapat diverifikasi (koneksi bermasalah) — halaman tetap terkunci. Periksa internetmu lalu tekan Periksa Lagi.";
+            return;
+          }
+          if (now >= P2_UNLOCK_MS) { loadP2(); }
+          else {
+            st.textContent = "Sekarang: " + fmtWIB(now) + " WIB — belum waktunya. Materi dibuka Rabu, 28 Oktober 2026 pukul 00.00 WIB.";
+          }
+        });
+      }
+      var recheck = document.getElementById("p2Recheck");
+      if (recheck) recheck.addEventListener("click", checkP2Gate);
+      checkP2Gate();
+    </script>
+  </body>
+</html>
