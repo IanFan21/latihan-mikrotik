@@ -458,7 +458,7 @@
     <section class="block" id="simulator">
       <div class="wrap">
         <div class="sec-head"><span class="sec-num">03</span><h2>Simulator Winbox</h2></div>
-        <p class="sec-sub">Ini tiruan jendela Winbox yang terhubung ke router <span class="mono">192.168.88.1</span>. Klik menu di sebelah kiri seperti di Winbox asli, lalu selesaikan 8 misi di panel kanan. Misi 5 hanya selesai kalau kamu benar-benar menekan tombol <b>Apply</b> — bukan sekadar membuka menunya.</p>
+        <p class="sec-sub">Ini tiruan jendela Winbox yang terhubung ke router <span class="mono">192.168.88.1</span>. Klik menu di sebelah kiri seperti di Winbox asli, lalu selesaikan 8 misi di panel kanan. Misi 5 hanya selesai kalau kamu benar-benar menekan tombol <b>Apply</b> — bukan sekadar membuka menunya. Yang baru: ada layar login Neighbors, tombol + Add di Addresses, DHCP Client, dan Firewall benar-benar menambah baris, DNS bisa diubah, dan terminal bisa dipakai untuk ping dan print.</p>
 
         <div class="mobile-mission-bar" id="mobileMissionBar" aria-live="polite">
           <span class="mmb-label">Misi berikutnya</span>
@@ -468,7 +468,21 @@
         <p class="mobile-sim-hint">Di HP: geser bilah menu Winbox ke samping untuk melihat semua menu, lalu ketuk menunya seperti di aplikasi asli. Isi panel di bawah menu bisa dibaca tanpa menggeser halaman.</p>
 
         <div class="sim-layout">
-          <div class="winbox" role="application" aria-label="Simulator Winbox">
+          <div class="winbox" id="wbWindow" role="application" aria-label="Simulator Winbox" style="position:relative">
+            <div id="wbLogin" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:rgba(8,18,30,.97);padding:16px">
+              <div style="background:#1b2f45;border:1px solid #2a435e;border-radius:10px;padding:16px;max-width:520px;width:100%;color:#dbe7f3">
+                <p class="wb-pane-title" style="color:#fff">Winbox — Neighbors</p>
+                <p style="font-size:13px;color:#9fb3c8;margin-bottom:8px">Klik baris router di daftar Neighbors, lalu tekan Connect. Login MAC dipakai saat router belum punya IP atau IP-nya tidak diketahui.</p>
+                <table style="width:100%;border-collapse:collapse;font-size:13.5px"><thead><tr><th style="text-align:left;border-bottom:1px solid #2a435e;padding:6px 8px">MAC Address</th><th style="text-align:left;border-bottom:1px solid #2a435e;padding:6px 8px">IP Address</th><th style="text-align:left;border-bottom:1px solid #2a435e;padding:6px 8px">Identity</th><th style="text-align:left;border-bottom:1px solid #2a435e;padding:6px 8px">Version</th></tr></thead><tbody><tr id="wbNeighborRow" data-mac="4C:5E:0C:11:22:33" data-ip="192.168.88.1" style="cursor:pointer"><td class="mono" style="padding:6px 8px">4C:5E:0C:11:22:33</td><td class="mono" style="padding:6px 8px">192.168.88.1</td><td class="mono" style="padding:6px 8px">MikroTik</td><td class="mono" style="padding:6px 8px">6.49</td></tr></tbody></table>
+                <div class="wb-form" style="margin-top:12px">
+                <label>Connect To <input id="wbLoginTarget" type="text" placeholder="klik baris Neighbors atau isi IP"></label>
+                <label>Login <input id="wbLoginUser" type="text" value="admin"></label>
+                <label>Password <input id="wbLoginPass" type="password" placeholder="kosongkan"></label>
+                </div>
+                <p style="margin-top:12px"><button class="wb-tbtn primary" id="wbLoginConnect" type="button">Connect</button></p>
+                <p id="wbLoginMsg" style="font-size:13px;color:#9fb3c8;margin-top:8px"></p>
+              </div>
+            </div>
             <div class="wb-titlebar">
               <span style="font-size:14px">▦</span>
               <span id="wbTitle">admin@192.168.88.1 (MikroTik) — WinBox</span>
@@ -844,6 +858,8 @@
       "use strict";
       /* =============== SIMULATOR WINBOX =============== */
       var SIM = { identity: "MikroTik", panel: "interfaces" };
+      var SIM_EXTRA = { addrs: [], clients: [], nats: [] };
+      var SIM_DNS = { servers: "8.8.8.8", dynamic: "1.1.1.1", remote: true };
       var SIM_PANELS = {
         "interfaces": { title: "Interface List", toolbar: ["+ Add", "Enable", "Disable", "Comment"], html:
           '<p class="wb-pane-title">Interface List</p><table><thead><tr><th></th><th>Name</th><th>Type</th><th>Actual MTU</th><th>Status</th></tr></thead><tbody>' +
@@ -882,7 +898,7 @@
           '<label>Dynamic Servers <input value="1.1.1.1" readonly></label>' +
           '<label>Allow Remote Requests <span class="wb-check"><span class="cb">✓</span> aktif — router meneruskan DNS klien</span></label></div>' +
           '<p style="margin-top:10px;color:#5b7186">Kalau kotak ini tidak dicentang: ping ke alamat IP tetap jalan, tapi membuka nama situs gagal.</p>' },
-        "firewall": { title: "Firewall · NAT", toolbar: ["Filter Rules", "NAT", "Mangle"], html:
+        "firewall": { title: "Firewall · NAT", toolbar: ["+ Add", "Filter Rules", "NAT", "Mangle"], html:
           '<p class="wb-pane-title">Firewall — tab NAT</p><table><thead><tr><th></th><th>Chain</th><th>Out. Interface</th><th>Action</th><th>Keterangan</th></tr></thead><tbody>' +
           '<tr><td class="flag">0</td><td class="mono">srcnat</td><td class="mono">ether1</td><td class="mono"><b>masquerade</b></td><td>syarat internet klien</td></tr></tbody></table>' +
           '<p style="margin-top:8px;color:#5b7186">Satu baris kecil ini yang membuat semua IP privat klien disamarkan menjadi IP router saat keluar ke internet. Tab Filter Rules dipakai di Pertemuan 2.</p>' },
@@ -913,7 +929,7 @@
           '<p class="wb-check" style="display:flex;margin-bottom:6px"><span class="cb"></span> Keep User Configuration — pertahankan user &amp; password</p>' +
           '<p class="wb-check" style="display:flex;margin-bottom:12px"><span class="cb"></span> No Backup — tanpa membuat file cadangan dulu</p>' +
           '<button class="wb-tbtn" id="simResetBtn" type="button">Reset Configuration</button>' +
-          '<p style="margin-top:10px;color:#5b7186">Di simulator tombol ini tidak benar-benar me-reset. Di router asli: setelah reset tanpa default, router tidak punya IP — masuk lagi hanya lewat MAC Address.</p>' },
+          '<p style="margin-top:10px;color:#5b7186">Tombol ini mengembalikan simulator ke kondisi awal (tambahanmu dihapus, nama kembali ke MikroTik) dan membawamu kembali ke layar login — sama seperti router asli yang setelah reset hanya bisa dimasuki lewat MAC Address.</p>' },
         "queues": { title: "Simple Queues", toolbar: ["+ Add"], html:
           '<p class="wb-pane-title">Simple Queues</p><table><thead><tr><th></th><th>Name</th><th>Target</th><th>Max Limit (Up/Down)</th></tr></thead><tbody>' +
           '<tr><td class="flag">0</td><td class="mono">Limit-Klien</td><td class="mono">192.168.88.10</td><td class="mono">2M / 5M</td></tr></tbody></table>' +
@@ -1012,6 +1028,7 @@
           return '<button type="button" class="wb-tbtn' + (p.primary === i ? " primary" : "") + '" data-tb="' + esc(t) + '">' + esc(t) + "</button>";
         }).join("") || '<span style="font-size:12.5px;color:#5b7186">' + esc(p.title) + "</span>";
         $("#wbContent").innerHTML = p.html;
+        simPostRender();
         var inp = $("#simIdentityInput");
         if (inp) { inp.value = SIM.identity; if (window.__paramsRef) inp.value = window.__paramsRef.identity; }
         var apply = $("#simIdentityApply"), ok = $("#simIdentityOk");
@@ -1025,8 +1042,204 @@
         if (apply) apply.addEventListener("click", doApply);
         if (ok) ok.addEventListener("click", doApply);
         var rb = $("#simResetBtn");
-        if (rb) rb.addEventListener("click", function () { setStatus("Simulator: reset dibatalkan — di router asli, sesudah ini kamu harus login lagi via MAC Address.", false); });
+        if (rb) rb.addEventListener("click", function () { simDoReset(); });
         checkPanelMission(SIM.panel);
+      }
+      function simNetOf(addr) {
+        var parts = (addr || "").split("/");
+        if (parts.length !== 2) return "";
+        var prefix = parseInt(parts[1], 10);
+        if (isNaN(prefix) || prefix < 0 || prefix > 32) return "";
+        var octs = parts[0].split(".");
+        if (octs.length !== 4) return "";
+        for (var i = 0; i < 4; i++) { var o = parseInt(octs[i], 10); if (isNaN(o) || o < 0 || o > 255) return ""; }
+        try { return networkOf(parts[0], prefix); } catch (e) { return ""; }
+      }
+      function simAppendExtras() {
+        var tb = $("#wbContent table tbody");
+        if (!tb) return;
+        var rows = "";
+        if (SIM.panel === "addresses") {
+          SIM_EXTRA.addrs.forEach(function (r) { rows += '<tr><td></td><td class="mono">' + esc(r.address) + '</td><td class="mono">' + esc(r.network) + '</td><td class="mono">' + esc(r.iface) + '</td></tr>'; });
+        } else if (SIM.panel === "dhcp-client") {
+          SIM_EXTRA.clients.forEach(function (r) { rows += '<tr><td class="mono">' + esc(r.iface) + '</td><td><b style="color:#177245">bound</b></td><td class="mono">' + esc(r.ip) + '</td><td class="mono">' + esc(r.gateway) + '</td><td>' + esc(r.expires) + '</td></tr>'; });
+        } else if (SIM.panel === "firewall") {
+          SIM_EXTRA.nats.forEach(function (r, i) { rows += '<tr><td class="flag">' + (i + 1) + '</td><td class="mono">' + esc(r.chain) + '</td><td class="mono">' + esc(r.out) + '</td><td class="mono"><b>' + esc(r.action) + '</b></td><td>buatan siswa</td></tr>'; });
+        }
+        if (rows) tb.insertAdjacentHTML("beforeend", rows);
+      }
+      function simPostRender() {
+        simAppendExtras();
+        if (SIM.panel === "dns") {
+          var inputs = $all("#wbContent .wb-form input");
+          if (inputs.length >= 2) {
+            inputs[0].readOnly = false; inputs[0].value = SIM_DNS.servers;
+            inputs[1].readOnly = false; inputs[1].value = SIM_DNS.dynamic;
+          }
+          var chk = $("#wbContent .wb-check");
+          if (chk) chk.innerHTML = '<input type="checkbox" id="simDnsRemote"' + (SIM_DNS.remote ? ' checked' : '') + '> aktif — router meneruskan DNS klien';
+          if (!$("#simDnsApply")) {
+            var p = document.createElement("p");
+            p.style.marginTop = "10px";
+            p.innerHTML = '<button class="wb-tbtn primary" id="simDnsApply" type="button">Apply</button>';
+            $("#wbContent").appendChild(p);
+            $("#simDnsApply").addEventListener("click", function () {
+              var ins = $all("#wbContent .wb-form input");
+              if (ins.length >= 2) { SIM_DNS.servers = ins[0].value; SIM_DNS.dynamic = ins[1].value; }
+              var cb = $("#simDnsRemote"); if (cb) SIM_DNS.remote = cb.checked;
+              setStatus("DNS disimpan: " + SIM_DNS.servers + " · Allow Remote Requests " + (SIM_DNS.remote ? "aktif" : "nonaktif"), true);
+            });
+          }
+        }
+        if (SIM.panel === "terminal") {
+          var term = $("#wbContent .wb-term");
+          if (term && !$("#simTermLine")) {
+            var line = document.createElement("div");
+            line.id = "simTermLine";
+            line.style.marginTop = "8px";
+            line.innerHTML = '<span class="dim">[admin@' + esc(SIM.identity) + '] &gt;</span> <input id="simTermInput" type="text" placeholder="ketik help lalu Enter" style="background:#0b1522;color:#dbe7f3;border:1px solid #2a435e;border-radius:6px;padding:6px 8px;width:70%">';
+            term.parentNode.insertBefore(line, term.nextSibling);
+            var hint = document.createElement("p");
+            hint.style.cssText = "margin-top:8px;color:#5b7186";
+            hint.textContent = "Terminal ini bisa dipakai: ping, /ip address print, /ip dhcp-client print, /ip firewall nat print, help, clear.";
+            line.parentNode.insertBefore(hint, line.nextSibling);
+            $("#simTermInput").addEventListener("keydown", function (ev) {
+              if (ev.key === "Enter") { var v = this.value; this.value = ""; simTermRun(v); }
+            });
+          }
+        }
+      }
+      function simTermOut(html) {
+        var term = $("#wbContent .wb-term");
+        if (term) { term.insertAdjacentHTML("beforeend", html); term.scrollTop = term.scrollHeight; }
+      }
+      function simTermRun(raw) {
+        var cmd = (raw || "").trim();
+        if (!cmd) return;
+        simTermOut('<span class="dim">[admin@' + esc(SIM.identity) + '] &gt;</span> ' + esc(cmd) + '<br>');
+        var low = cmd.toLowerCase();
+        if (low === "help") {
+          simTermOut('Perintah yang didukung:<br>&nbsp;&nbsp;ping &lt;tujuan&gt; [count=N]<br>&nbsp;&nbsp;/ip address print<br>&nbsp;&nbsp;/ip dhcp-client print<br>&nbsp;&nbsp;/ip firewall nat print<br>&nbsp;&nbsp;clear<br>');
+          return;
+        }
+        if (low === "clear") { var term = $("#wbContent .wb-term"); if (term) term.innerHTML = ""; return; }
+        if (low.indexOf("ping ") === 0) {
+          var toks = cmd.split(/\s+/);
+          var target = toks[1] || "";
+          var count = 4;
+          toks.forEach(function (t) { if (t.toLowerCase().indexOf("count=") === 0) { var n = parseInt(t.split("=")[1], 10); if (!isNaN(n) && n > 0 && n <= 20) count = n; } });
+          var ok = false, ip = target;
+          if (target === "8.8.8.8") { ok = true; ip = "8.8.8.8"; }
+          else if (target === "google.com") { ok = true; ip = "142.250.185.78"; }
+          else if (/^192\.168\.88\.\d+$/.test(target)) { ok = true; ip = target; }
+          var out = "";
+          if (ok) {
+            var times = ["18ms", "17ms", "19ms", "18ms", "17ms"];
+            for (var i = 0; i < count; i++) out += '&nbsp;&nbsp;' + esc(ip) + '&nbsp;&nbsp;64 byte ping: ttl=' + ((target === "8.8.8.8" || target === "google.com") ? "117" : "64") + ' time=' + (ip.indexOf("192.168.88.") === 0 ? "&lt;1ms" : times[i % times.length]) + '<br>';
+            out += '<span class="grn">&nbsp;&nbsp;--- ' + count + ' packets transmitted, ' + count + ' received, 0% loss ---</span><br>';
+          } else {
+            for (var j = 0; j < count; j++) out += '&nbsp;&nbsp;timeout<br>';
+            out += '<span class="grn">&nbsp;&nbsp;--- ' + count + ' packets transmitted, 0 received, 100% packet loss ---</span><br>';
+          }
+          simTermOut(out);
+          return;
+        }
+        if (low === "/ip address print") {
+          var out = 'Flags: D - dynamic<br>&nbsp;&nbsp;#&nbsp;&nbsp;ADDRESS&nbsp;&nbsp;NETWORK&nbsp;&nbsp;INTERFACE<br>';
+          out += '&nbsp;&nbsp;0&nbsp;&nbsp;192.168.88.1/24&nbsp;&nbsp;192.168.88.0&nbsp;&nbsp;ether2<br>';
+          out += '&nbsp;&nbsp;D&nbsp;&nbsp;172.16.8.25/24&nbsp;&nbsp;172.16.8.0&nbsp;&nbsp;ether1<br>';
+          SIM_EXTRA.addrs.forEach(function (r, i) { out += '&nbsp;&nbsp;' + (i + 1) + '&nbsp;&nbsp;' + esc(r.address) + '&nbsp;&nbsp;' + esc(r.network) + '&nbsp;&nbsp;' + esc(r.iface) + '<br>'; });
+          simTermOut(out);
+          return;
+        }
+        if (low === "/ip dhcp-client print") {
+          var out2 = 'Flags:<br>&nbsp;&nbsp;#&nbsp;&nbsp;INTERFACE&nbsp;&nbsp;STATUS&nbsp;&nbsp;IP&nbsp;&nbsp;GATEWAY<br>';
+          out2 += '&nbsp;&nbsp;0&nbsp;&nbsp;ether1&nbsp;&nbsp;bound&nbsp;&nbsp;172.16.8.25&nbsp;&nbsp;172.16.8.1<br>';
+          SIM_EXTRA.clients.forEach(function (r, i) { out2 += '&nbsp;&nbsp;' + (i + 1) + '&nbsp;&nbsp;' + esc(r.iface) + '&nbsp;&nbsp;bound&nbsp;&nbsp;' + esc(r.ip) + '&nbsp;&nbsp;' + esc(r.gateway) + '<br>'; });
+          simTermOut(out2);
+          return;
+        }
+        if (low === "/ip firewall nat print") {
+          var out3 = 'Flags:<br>&nbsp;&nbsp;#&nbsp;&nbsp;CHAIN&nbsp;&nbsp;OUT-INTERFACE&nbsp;&nbsp;ACTION<br>';
+          out3 += '&nbsp;&nbsp;0&nbsp;&nbsp;srcnat&nbsp;&nbsp;ether1&nbsp;&nbsp;masquerade<br>';
+          SIM_EXTRA.nats.forEach(function (r, i) { out3 += '&nbsp;&nbsp;' + (i + 1) + '&nbsp;&nbsp;' + esc(r.chain) + '&nbsp;&nbsp;' + esc(r.out) + '&nbsp;&nbsp;' + esc(r.action) + '<br>'; });
+          simTermOut(out3);
+          return;
+        }
+        simTermOut('bad command name (ketik <b>help</b> untuk daftar perintah)<br>');
+      }
+      function simOpenAddDialog(panel) {
+        var old = $("#simAddDialog"); if (old) old.parentNode.removeChild(old);
+        var dlg = document.createElement("div");
+        dlg.id = "simAddDialog";
+        dlg.style.cssText = "margin-top:10px;background:#0f1c2b;border:1px solid #2a435e;border-radius:8px;padding:12px";
+        var fields = "", title = "";
+        if (panel === "addresses") {
+          title = "Tambah Address";
+          fields = '<div class="wb-form"><label>Address <input id="simDlgA" type="text" placeholder="192.168.88.2/24"></label><label>Interface <select id="simDlgB"><option value="ether2" selected>ether2</option><option value="ether1">ether1</option><option value="ether3">ether3</option></select></label></div>';
+        } else if (panel === "dhcp-client") {
+          title = "Tambah DHCP Client";
+          fields = '<div class="wb-form"><label>Interface <select id="simDlgB"><option value="ether1" selected>ether1</option><option value="ether2">ether2</option><option value="ether3">ether3</option></select></label></div>';
+        } else {
+          title = "Tambah Aturan NAT";
+          fields = '<div class="wb-form"><label>Chain <select id="simDlgA"><option value="srcnat" selected>srcnat</option><option value="dstnat">dstnat</option></select></label><label>Out. Interface <select id="simDlgB"><option value="ether1" selected>ether1</option><option value="ether2">ether2</option><option value="ether3">ether3</option></select></label><label>Action <select id="simDlgC"><option value="masquerade" selected>masquerade</option><option value="accept">accept</option><option value="drop">drop</option></select></label></div>';
+        }
+        dlg.innerHTML = '<p class="wb-pane-title">' + title + '</p>' + fields + '<p style="margin-top:10px"><button class="wb-tbtn primary" id="simDlgOk" type="button">OK</button> <button class="wb-tbtn" id="simDlgCancel" type="button">Batal</button></p>';
+        $("#wbContent").appendChild(dlg);
+        $("#simDlgCancel").addEventListener("click", function () { dlg.parentNode.removeChild(dlg); });
+        $("#simDlgOk").addEventListener("click", function () {
+          if (panel === "addresses") {
+            var addr = ($("#simDlgA").value || "").trim();
+            var iface = $("#simDlgB").value;
+            var net = simNetOf(addr);
+            if (!net) { setStatus("Isi Address dengan format IP/prefix, contoh 192.168.88.2/24.", false); return; }
+            SIM_EXTRA.addrs.push({ address: addr, network: net, iface: iface });
+            renderSimPanel();
+            setStatus("Address " + addr + " ditambahkan di " + iface + ".", true);
+          } else if (panel === "dhcp-client") {
+            var iface2 = $("#simDlgB").value;
+            var exists = SIM_EXTRA.clients.some(function (c) { return c.iface === iface2; }) || iface2 === "ether1";
+            if (exists) { setStatus("Interface " + iface2 + " sudah punya DHCP Client.", false); return; }
+            var ip = iface2 === "ether2" ? "192.168.88.100" : "192.168.88.101";
+            SIM_EXTRA.clients.push({ iface: iface2, ip: ip, gateway: "192.168.88.1", expires: "23:59:59" });
+            renderSimPanel();
+            setStatus("DHCP Client di " + iface2 + " ditambahkan (bound).", true);
+          } else {
+            var ch = $("#simDlgA").value, outI = $("#simDlgB").value, act = $("#simDlgC").value;
+            SIM_EXTRA.nats.push({ chain: ch, out: outI, action: act });
+            renderSimPanel();
+            setStatus("Aturan NAT ditambahkan: " + ch + " keluar " + outI + " action " + act + ".", true);
+          }
+        });
+      }
+      function simDoReset() {
+        SIM_EXTRA.addrs = []; SIM_EXTRA.clients = []; SIM_EXTRA.nats = [];
+        SIM_DNS = { servers: "8.8.8.8", dynamic: "1.1.1.1", remote: true };
+        SIM.identity = "MikroTik";
+        $("#wbTitle").textContent = "admin@192.168.88.1 (MikroTik) — WinBox";
+        var login = $("#wbLogin"); if (login) login.style.display = "flex";
+        SIM.panel = "interfaces";
+        renderSimPanel();
+        setStatus("Simulator di-reset ke kondisi awal — silakan login lagi via MAC Address.", false);
+      }
+      function simLoginInit() {
+        var row = $("#wbNeighborRow");
+        if (row) row.addEventListener("click", function () {
+          $("#wbLoginTarget").value = row.getAttribute("data-mac");
+          row.style.background = "#2a435e";
+          var msg = $("#wbLoginMsg"); if (msg) msg.textContent = "Router dipilih: " + row.getAttribute("data-mac") + " (192.168.88.1). Tekan Connect.";
+        });
+        var go = $("#wbLoginConnect");
+        if (go) go.addEventListener("click", function () {
+          var target = ($("#wbLoginTarget").value || "").trim();
+          var msg = $("#wbLoginMsg");
+          if (!target) { if (msg) msg.textContent = "Pilih dulu router di daftar Neighbors (klik barisnya)."; return; }
+          var login = $("#wbLogin"); if (login) login.style.display = "none";
+          setStatus("Terhubung via " + target + " (192.168.88.1) — selamat berlatih.", true);
+          renderSimPanel();
+        });
+        var pass = $("#wbLoginPass");
+        if (pass) pass.addEventListener("keydown", function (ev) { if (ev.key === "Enter") { var g = $("#wbLoginConnect"); if (g) g.click(); } });
       }
       function buildSimMenu() {
         var nav = $("#wbMenu"); if (!nav) return;
@@ -1044,7 +1257,9 @@
         $("#wbToolbar").addEventListener("click", function (ev) {
           var b = ev.target.closest ? ev.target.closest("button[data-tb]") : null;
           if (!b) return;
-          setStatus("Tombol “" + b.getAttribute("data-tb") + "” — di simulator cukup dibaca fungsinya dari panel.", false);
+          var tb = b.getAttribute("data-tb");
+          if (tb === "+ Add" && (SIM.panel === "addresses" || SIM.panel === "dhcp-client" || SIM.panel === "firewall")) { simOpenAddDialog(SIM.panel); return; }
+          setStatus("Tombol “" + tb + "” — di simulator cukup dibaca fungsinya dari panel.", false);
         });
         var rst = $("#missionReset");
         if (rst) rst.addEventListener("click", function () { missionDone = {}; $("#missionMsg").textContent = "Misi diulang dari awal. Semangat!"; renderMissions(); });
@@ -1052,6 +1267,7 @@
       buildSimMenu();
       renderSimPanel();
       renderMissions();
+      simLoginInit();
       window.__onParams = function (p) {
         window.__paramsRef = p;
         if (SIM.panel === "identity") { var inp = $("#simIdentityInput"); if (inp) inp.value = p.identity; }
